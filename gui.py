@@ -38,23 +38,6 @@ def main():
     goal_label = tk.Label(welcome_frame , text = "What would you like to work on today?")
     goal_label.grid(row=3, column=0)
 
-    def start_screen():
-        clear_screen(welcome_frame)
-
-        plan_button = tk.Button(welcome_frame, text="Plan It", command=plan_mode)
-        plan_button.grid(row=2, column=0, pady=7)
-
-        perspective_button = tk.Button(welcome_frame, text="Different Perspectives")
-        perspective_button.grid(row=3, column=0, pady=7)
-
-        concept_button = tk.Button(welcome_frame, text="Concepts You May Need")
-        concept_button.grid(row=4, column=0, pady=7)
-
-        begin_button = tk.Button(welcome_frame, text="Let's begin")
-        begin_button.grid(row=5, column=0, pady=7)
-
-        start_label = tk.Label(welcome_frame, text = "Where Should I start?")
-        start_label.grid(row = 0, column = 0)
 
     def plan_mode():
         clear_screen(welcome_frame)
@@ -71,9 +54,40 @@ def main():
         continue_button = tk.Button(welcome_frame, text = "Continue", command = lambda: continue_mode(text_box))
         continue_button.grid(row=3, column=0, pady = 7)
 
+    def conversation_screen(project):
+        clear_screen(welcome_frame)
+
+        planning_session_label = tk.Label(welcome_frame, text="Planning Session")
+        planning_session_label.grid(row=0, column=0, pady=7)
+
+        project_idea_label = tk.Label(welcome_frame, text="Project Idea")
+        project_idea_label.grid(row=1, column=0, pady=7)
+
+        ai_explanaition_label = tk.Label(welcome_frame, text="Great! Let's understand your project together.")
+        ai_explanaition_label.grid(row=3, column=0, pady=7)
+
+        project_text_box = tk.Text(welcome_frame, width=50, height=7)
+        project_text_box.grid(row=2, column=0, pady=7)
+
+        project_text_box.insert("1.0", project)
+
+        continue_button = tk.Button( welcome_frame,
+            text="Continue",
+            command=lambda: next_question(project_text_box)
+        )
+        continue_button.grid(row=4, column=0, pady=7)
+
+
+    def next_question(project_text_box):
+        project = project_text_box.get("1.0", "end").strip()
+        print(project)
+
+
     def continue_mode(text_box):
         print("Continue clicked")
 
+        project = text_box.get("1.0", "end").strip()
+        conversation_screen(project)
 
 
     def clear_screen(frame):
@@ -84,8 +98,35 @@ def main():
     goal_entry = tk.Entry(welcome_frame)
     goal_entry.grid(row=4, column=0)
 
-    start_button = tk.Button(welcome_frame, text = "Start", command=start_screen)
+    def start_ai():
+        print(goal_entry.get())
+
+
+    start_button = tk.Button(welcome_frame, text = "Start",
+                             command = start_ai)
+
     start_button.grid(row=5, column=0)
 
+    mode_frame = tk.Frame(welcome_frame)
+    mode_frame.grid(row=6, column=0, pady=20)
+
+    project_button = tk.Button(mode_frame,
+        text="Start a New Project"  , command=plan_mode
+    )
+    project_button.pack(fill="x" , pady=7)
+
+    def learn_mode():
+        print("cooming soon")
+
+    def debug_mode():
+        print("coming soon")
+
+    learn_mode_button = tk.Button(mode_frame,text="Learn Mode", command = learn_mode)
+    learn_mode_button.pack(fill="x" , pady=7)
+
+    debug_mode_button = tk.Button(mode_frame,text="Debug Mode",command = debug_mode)
+    debug_mode_button.pack(fill="x" , pady=7)
+
     window.mainloop()
+
 main()
