@@ -3,6 +3,7 @@ import os
 from dotenv import load_dotenv
 from ai_client import AIClient
 from mentor_prompts import HINT_PROMPT, QUESTION_PROMPT, SOLUTION_PROMPT
+from mentor_prompts import LEARN_PROMPT
 
 
 class OpenAIClient(AIClient):
@@ -50,6 +51,17 @@ class OpenAIClient(AIClient):
         )
         return response.choices[0].message.content
 
+
+    def get_learning_explanation(self, topic):
+        messages = [
+            {"role": "system", "content": LEARN_PROMPT},
+            {"role": "user", "content": topic}
+        ]
+        response = self.client.chat.completions.create(
+        model="gpt-4.1-mini",
+        messages  =  messages )
+
+        return response.choices[0].message.content
 
 if __name__ == "__main__":
     client = OpenAIClient()

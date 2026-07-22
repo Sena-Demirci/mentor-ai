@@ -158,7 +158,10 @@ def main():
         message_label.grid(row=3, column=0, pady=7)
 
     def generate_explanation(topic):
-        return f"Let's learn about {topic}!"
+        from openai_client import OpenAIClient
+
+        client = OpenAIClient()
+        return client.get_learning_explanation(topic)
 
 
     def start_debugging():
