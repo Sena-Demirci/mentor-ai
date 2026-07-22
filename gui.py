@@ -116,19 +116,20 @@ def main():
     project_button.pack(fill="x" , pady=7)
 
     def learn_mode():
-        for widget in mode_frame.winfo_children():
-            widget.destroy()
+        global learn_mode_text_box
 
-        learn_mode_title_label = tk.Label(mode_frame, text="Learn Mode")
+        clear_screen(welcome_frame)
+
+        learn_mode_title_label = tk.Label(welcome_frame, text="Learn Mode")
         learn_mode_title_label.grid(row=0, column=0, pady=7)
 
-        learn_mode_description_label = tk.Label(mode_frame, text="Learn Mode Description")
+        learn_mode_description_label = tk.Label(welcome_frame, text="Learn Mode Description")
         learn_mode_description_label.grid(row=1, column=0, pady=7)
 
-        learn_mode_text_box = tk.Text(mode_frame, width=50, height=7)
+        learn_mode_text_box = tk.Text(welcome_frame, width=50, height=7)
         learn_mode_text_box.grid(row=2, column=0, pady=7)
 
-        learn_mode_button = tk.Button(mode_frame,text="Continue",command = start_learning)
+        learn_mode_button = tk.Button(welcome_frame,text="Continue",command = start_learning)
         learn_mode_button.grid(row=3, column=0 , pady=7)
 
 
@@ -136,7 +137,29 @@ def main():
         print("coming soon")
 
     def start_learning():
-        pass
+
+
+        topic =  learn_mode_text_box.get("1.0" , "end" ).strip()
+
+        ai_response = generate_explanation(topic)
+
+        clear_screen(welcome_frame)
+
+        learn_session_label = tk.Label(welcome_frame, text="Learn Session")
+        learn_session_label.grid(row=0, column=0, pady=7)
+
+        today_label = tk.Label(welcome_frame, text="Today we'll learn:")
+        today_label.grid(row=1, column=0, pady=7)
+
+        topic_label = tk.Label(welcome_frame, text= topic)
+        topic_label.grid(row=2, column=0, pady=7)
+
+        message_label = tk.Label(welcome_frame, text=ai_response)
+        message_label.grid(row=3, column=0, pady=7)
+
+    def generate_explanation(topic):
+        return f"Let's learn about {topic}!"
+
 
     def start_debugging():
         pass
