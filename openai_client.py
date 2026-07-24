@@ -57,11 +57,20 @@ class OpenAIClient(AIClient):
             {"role": "system", "content": LEARN_PROMPT},
             {"role": "user", "content": topic}
         ]
-        response = self.client.chat.completions.create(
-        model="gpt-4.1-mini",
-        messages  =  messages )
+        try:
+           response = self.client.chat.completions.create(
+               model="gpt-4.1-mini",
+               messages  =  messages )
 
-        return response.choices[0].message.content
+           return response.choices[0].message.content
+
+        except Exception:
+            return(
+                "I couldn't reach the AI right now.\n\n"
+                "Please check your internet connection or try again later."
+            )
+
+
 
 if __name__ == "__main__":
     client = OpenAIClient()

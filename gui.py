@@ -1,4 +1,7 @@
 import tkinter as tk
+from logging import disable
+
+
 def main():
     window = tk.Tk()
     window.title("Mentor AI")
@@ -154,14 +157,23 @@ def main():
         topic_label = tk.Label(welcome_frame, text= topic)
         topic_label.grid(row=2, column=0, pady=7)
 
-        message_label = tk.Label(welcome_frame, text=ai_response)
-        message_label.grid(row=3, column=0, pady=7)
+        message_text = tk.Text(welcome_frame,width=60, height= 15)
+        message_text.grid(row=3, column=0, pady=7)
+        message_text.insert("1.0", ai_response)
+        message_text.config(state = "disabled")
+
+        scrollbar = tk.Scrollbar(welcome_frame)
+        scrollbar.grid(row=3, column=1, sticky="ns")
+        scrollbar.config(command=message_text.yview)
+        message_text.config(yscrollcommand=scrollbar.set)
 
     def generate_explanation(topic):
         from openai_client import OpenAIClient
 
         client = OpenAIClient()
         return client.get_learning_explanation(topic)
+
+
 
 
     def start_debugging():
