@@ -14,18 +14,25 @@ class OpenAIClient(AIClient):
         self.client = OpenAI(api_key=api_key)
 
     def get_a_hint(self, building, problem, code):
-        response = self.client.chat.completions.create(
-            model="gpt-4.1-mini",
-            messages=[
-                {"role": "system", "content": HINT_PROMPT},
-                {"role": "user", "content": f"What I'm building:\n{building}"},
-                {"role": "user", "content": f"Where I'm stuck:\n{problem}"},
-                {"role": "user", "content": f"My code:\n{code}"}
-            ]
-        )
+        try:
+            response = self.client.chat.completions.create(
+                model="gpt-4.1-mini",
+                messages=[
+                    {"role": "system", "content": HINT_PROMPT},
+                    {"role": "user", "content": f"What I'm building:\n{building}"},
+                    {"role": "user", "content": f"Where I'm stuck:\n{problem}"},
+                    {"role": "user", "content": f"My code:\n{code}"}
+                ]
+            )
 
-        return response.choices[0].message.content
+            return response.choices[0].message.content
 
+        except Exception:
+            return (
+                "Demo Hint\n\n"
+                "Think about which variable should change every iteration.\n"
+                "Try tracing your code step by step instead of changing the syntax."
+            )
     def get_a_question(self, question, code=""):
         response = self.client.chat.completions.create(
             model="gpt-4.1-mini",
