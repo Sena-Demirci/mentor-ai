@@ -30,7 +30,7 @@ def main():
     welcome_frame.pack(fill = "both" , expand = True)
 
     welcome_frame.columnconfigure(0, weight=1)
-    welcome_frame.rowconfigure(6, weight=1)
+
 
     title_label=tk.Label(welcome_frame, text = "Mentor AI")
     title_label.grid(row=0, column=0)
@@ -219,7 +219,74 @@ def main():
             question
         )
 
+    def open_hint_mode():
+        print("Hint Mode opened")
 
+        clear_screen(welcome_frame)
+
+        clear_screen(welcome_frame)
+
+        hint_mode_title_label = tk.Label(welcome_frame, text="Hint Mode")
+        hint_mode_title_label.grid(row=0, column=0, pady=7)
+
+        hint_mode_question_label = tk.Label(welcome_frame, text="What are you building?")
+        hint_mode_question_label.grid(row=1, column=0, pady=7)
+
+        hint_mode_first_text_box = tk.Text(welcome_frame, width=50, height=4)
+        hint_mode_first_text_box.grid(row=2, column=0, pady=7)
+
+        hint_mode_problem_label = tk.Label(welcome_frame, text="Where are you stuck?")
+        hint_mode_problem_label.grid(row=3, column=0, pady=(10, 3))
+
+        hint_mode_second_text_box = tk.Text(welcome_frame, width=50, height=4)
+        hint_mode_second_text_box.grid(row=4, column=0, pady=(0, 10))
+
+        hint_mode_second_text_box.insert(
+            "1.0",
+            "Example:\nI don't know why my loop never stops."
+        )
+
+        hint_mode_second_text_box.config(fg="gray")
+        hint_mode_second_text_box.bind("<FocusIn>", clear_placeholder)
+
+        hint_mode_code_label = tk.Label(
+            welcome_frame,
+            text="Paste only the relevant code."
+        )
+        hint_mode_code_label.grid(row=5, column=0, pady=(5, 3))
+
+        hint_mode_third_text_box = tk.Text(welcome_frame,width=50,height=6
+        )
+        hint_mode_third_text_box.grid(row=6, column=0, pady=(0, 10))
+
+        hint_mode_third_text_box.insert(
+            "1.0",
+            "Only include the code related to your problem."
+        )
+
+        hint_mode_third_text_box.config(fg="gray")
+        hint_mode_third_text_box.bind("<FocusIn>", clear_placeholder)
+
+
+
+    def clear_placeholder(event):
+        text_box = event.widget
+
+        current_text = text_box.get("1.0", "end-1c")
+
+        if current_text == "Example:\nI don't know why my loop never stops.":
+            text_box.delete("1.0", "end")
+            text_box.config(fg="black")
+
+        elif current_text == "Only include the code related to your problem.":
+            text_box.delete("1.0", "end")
+            text_box.config(fg="black")
+
+    def restore_placeholder(event):
+        text_box = event.widget
+
+        if text_box.get("1.0", "end-1c").strip() == "":
+            text_box.config(fg="gray")
 
 
     def start_debugging():
@@ -230,6 +297,14 @@ def main():
 
     debug_mode_button = tk.Button(mode_frame,text="Debug Mode",command = debug_mode)
     debug_mode_button.pack(fill="x" , pady=7)
+
+    hint_button = tk.Button(
+        mode_frame,
+        text="Hint Mode",
+        command=open_hint_mode
+    )
+
+    hint_button.pack(fill="x", pady=7)
 
     window.mainloop()
 
