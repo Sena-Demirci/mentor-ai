@@ -140,7 +140,10 @@ def main():
         print("coming soon")
 
     def start_learning():
-
+        global follow_up_text
+        global topic
+        global ai_response
+        global message_text
 
         topic =  learn_mode_text_box.get("1.0" , "end" ).strip()
 
@@ -167,11 +170,54 @@ def main():
         scrollbar.config(command=message_text.yview)
         message_text.config(yscrollcommand=scrollbar.set)
 
+        input_frame = tk.Frame(welcome_frame)
+        input_frame.grid(row=4, column=0, pady=20, sticky = "ew")
+        input_frame.columnconfigure(0, weight=1)
+
+        follow_up_text = tk.Text(input_frame, width= 50, height = 3)
+        follow_up_text.grid(row=0, column=0,sticky="ew")
+
+        send_button = tk.Button(input_frame, width = 3 , text = "↑" , command = ask_follow_up)
+        send_button.grid(row=0, column=1,padx=5)
+
+    def ask_follow_up():
+        question = follow_up_text.get("1.0", "end").strip()
+
+        answer = generate_follow_up(
+            topic,
+            ai_response,
+            question
+        )
+
+        message_text.config(state="normal")
+
+        message_text.insert("end", "\n\nYou:\n")
+        message_text.insert("end", question)
+
+        message_text.insert("end", "\n\nMentor AI:\n")
+        message_text.insert("end", answer)
+
+        message_text.config(state="disabled")
+
+        follow_up_text.delete("1.0", "end")
+
+
     def generate_explanation(topic):
         from openai_client import OpenAIClient
 
         client = OpenAIClient()
         return client.get_learning_explanation(topic)
+
+    def generate_follow_up(topic, explanation, question):
+        from openai_client import OpenAIClient
+
+        client = OpenAIClient()
+
+        return client.get_follow_up_answer(
+            topic,
+            explanation,
+            question
+        )
 
 
 

@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from ai_client import AIClient
 from mentor_prompts import HINT_PROMPT, QUESTION_PROMPT, SOLUTION_PROMPT
 from mentor_prompts import LEARN_PROMPT
+from mentor_prompts import FOLLOW_UP_PROMPT
 
 
 class OpenAIClient(AIClient):
@@ -69,6 +70,30 @@ class OpenAIClient(AIClient):
                 "I couldn't reach the AI right now.\n\n"
                 "Please check your internet connection or try again later."
             )
+
+
+    def get_follow_up_answer(self, topic, explanation, question):
+        messages = [
+                {"role": "system", "content": FOLLOW_UP_PROMPT},
+                {"role": "user", "content": topic},
+                {"role": "assistant", "content": explanation},
+                {"role": "user", "content": question}
+        ]
+
+        try:
+           response = self.client.chat.completions.create(
+               model="gpt-4.1-mini",
+               messages  =  messages )
+
+           return response.choices[0].message.content
+
+        except Exception:
+            return(
+                "I couldn't reach the AI right now.\n\n"
+                "Please check your internet connection or try again later."
+            )
+
+
 
 
 
