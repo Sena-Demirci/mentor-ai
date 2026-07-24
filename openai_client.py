@@ -13,14 +13,17 @@ class OpenAIClient(AIClient):
         api_key = os.getenv("OPENAI_API_KEY")
         self.client = OpenAI(api_key=api_key)
 
-    def get_a_hint(self, question, code=""):
+    def get_a_hint(self, building, problem, code):
         response = self.client.chat.completions.create(
             model="gpt-4.1-mini",
             messages=[
-                {"role": "user", "content": question},
-                {"role": "system", "content": HINT_PROMPT}
+                {"role": "system", "content": HINT_PROMPT},
+                {"role": "user", "content": f"What I'm building:\n{building}"},
+                {"role": "user", "content": f"Where I'm stuck:\n{problem}"},
+                {"role": "user", "content": f"My code:\n{code}"}
             ]
         )
+
         return response.choices[0].message.content
 
     def get_a_question(self, question, code=""):

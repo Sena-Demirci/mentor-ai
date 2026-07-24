@@ -1,4 +1,5 @@
 import tkinter as tk
+from openai_client import OpenAIClient
 from logging import disable
 
 
@@ -220,6 +221,10 @@ def main():
         )
 
     def open_hint_mode():
+        global hint_mode_first_text_box
+        global hint_mode_second_text_box
+        global hint_mode_third_text_box
+
         print("Hint Mode opened")
 
         clear_screen(welcome_frame)
@@ -267,7 +272,13 @@ def main():
         hint_mode_third_text_box.config(fg="gray")
         hint_mode_third_text_box.bind("<FocusIn>", clear_placeholder)
 
+        hint_mode_button = tk.Button(
+            welcome_frame,
+            text="Get Hint",
+            command=start_hint_mode
+        )
 
+        hint_mode_button.grid(row=7, column=0, pady=10)
 
     def clear_placeholder(event):
         text_box = event.widget
@@ -305,6 +316,33 @@ def main():
     )
 
     hint_button.pack(fill="x", pady=7)
+
+    def start_hint_mode():
+        print("Hint Mode started")
+
+        building = hint_mode_first_text_box.get("1.0", "end").strip()
+        problem = hint_mode_second_text_box.get("1.0", "end").strip()
+        code = hint_mode_third_text_box.get("1.0", "end").strip()
+
+        client = OpenAIClient()
+
+        hint = client.get_a_hint(
+            building,
+            problem,
+            code
+        )
+
+        print(hint)
+
+        if building == "":
+            return
+
+        if problem == "Example:\nI don't know why my loop never stops.":
+            return
+
+        if code == "Only include the code related to your problem.":
+            return
+
 
     window.mainloop()
 
