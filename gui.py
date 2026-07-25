@@ -1,6 +1,7 @@
 import tkinter as tk
 from openai_client import OpenAIClient
 from logging import disable
+from tkinter import messagebox
 
 
 def main():
@@ -324,6 +325,27 @@ def main():
         problem = hint_mode_second_text_box.get("1.0", "end").strip()
         code = hint_mode_third_text_box.get("1.0", "end").strip()
 
+        if building == "":
+            messagebox.showwarning(
+                "Missing Information",
+                "Please describe what you are building."
+            )
+            return
+
+        if problem.strip() == "" or problem == "Example:\nI don't know why my loop never stops.":
+            messagebox.showwarning(
+                "Missing Information",
+                "Please explain where you are stuck."
+            )
+            return
+
+        if code.strip() == "" or code == "Only include the code related to your problem.":
+            messagebox.showwarning(
+                "Missing Information",
+                "Please paste the relevant code."
+            )
+            return
+
         client = OpenAIClient()
 
         hint = client.get_a_hint(
@@ -332,18 +354,76 @@ def main():
             code
         )
 
-        print(hint)
+        show_hint_session(
+            building,
+            problem,
+            code,
+            hint
+        )
 
-        if building == "":
-            return
+    def show_hint_session(building, problem, code, hint):
+        print("show_hint_session called")
+        clear_screen(welcome_frame)
+        title = tk.Label(welcome_frame, text="Hint Session")
+        title.grid(row=0, column=0, pady=10)
 
-        if problem == "Example:\nI don't know why my loop never stops.":
-            return
+        building_label = tk.Label(
+            welcome_frame,
+            text=f"Building: {building}"
+        )
+        building_label.grid(row=1, column=0, pady=7)
 
-        if code == "Only include the code related to your problem.":
-            return
+        hint_box = tk.Text(welcome_frame, width=60, height=15)
+        hint_box.grid(row=2, column=0, pady=7)
 
+        hint_box.insert("1.0", hint)
+        hint_box.config(state="disabled")
 
+        follow_up_label = tk.Label(
+            welcome_frame,
+            text="Still stuck? Ask for another hint."
+        )
+        follow_up_label.grid(row=3, column=0, pady=(15, 5))
+
+        follow_up_box = tk.Text(
+            welcome_frame,
+            width=60,
+            height=4
+        )
+        follow_up_box.grid(row=4, column=0, pady=5)
+
+        def ask_another_hint():
+            follow_up_question = follow_up_box.get("1.0", "end").strip()
+
+            if not follow_up_question:
+                messagebox.showwarning(
+                    "Missing Information",
+                    "Please enter a follow-up question."
+                )
+                return
+
+            client = OpenAIClient()
+
+            new_hint = client.get_follow_up_hint(
+                building,
+                problem,
+                code,
+                hint,
+                follow_up_question
+            )
+
+            hint_box.config(state="normal")
+            hint_box.delete("1.0", "end")
+            hint_box.insert("1.0", new_hint)
+            hint_box.config(state="disabled")
+
+        follow_up_button = tk.Button(
+            welcome_frame,
+            text="Ask Again",
+            command=ask_another_hint
+        )
+
+        follow_up_button.grid(row=5, column=0, pady=10)
     window.mainloop()
 
 main()
