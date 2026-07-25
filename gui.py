@@ -138,9 +138,6 @@ def main():
         learn_mode_button.grid(row=3, column=0 , pady=7)
 
 
-    def debug_mode():
-        print("coming soon")
-
     def start_learning():
         global follow_up_text
         global topic
@@ -294,6 +291,14 @@ def main():
             text_box.delete("1.0", "end")
             text_box.config(fg="black")
 
+        elif current_text == "Paste only the code related to your issue.":
+            text_box.delete("1.0", "end")
+            text_box.config(fg="black")
+
+        elif current_text == "Example:\nTypeError: unsupported operand type(s)...":
+            text_box.delete("1.0", "end")
+            text_box.config(fg="black")
+
     def restore_placeholder(event):
         text_box = event.widget
 
@@ -301,22 +306,6 @@ def main():
             text_box.config(fg="gray")
 
 
-    def start_debugging():
-        pass
-
-    learn_mode_button = tk.Button(mode_frame,text="Learn Mode", command = learn_mode)
-    learn_mode_button.pack(fill="x" , pady=7)
-
-    debug_mode_button = tk.Button(mode_frame,text="Debug Mode",command = debug_mode)
-    debug_mode_button.pack(fill="x" , pady=7)
-
-    hint_button = tk.Button(
-        mode_frame,
-        text="Hint Mode",
-        command=open_hint_mode
-    )
-
-    hint_button.pack(fill="x", pady=7)
 
     def start_hint_mode():
         print("Hint Mode started")
@@ -424,6 +413,71 @@ def main():
         )
 
         follow_up_button.grid(row=5, column=0, pady=10)
+
+
+    def debug_mode():
+
+        clear_screen(welcome_frame)
+
+        debug_mode_label = tk.Label(welcome_frame, text="Debug Mode")
+        debug_mode_label.grid(row = 0, column = 0, pady = 10)
+
+        debug_mode_code_label = tk.Label(welcome_frame, text="Paste your code here.")
+        debug_mode_code_label.grid(row = 1, column = 0, pady = 10)
+
+        debug_mode_code_paste_text_box = tk.Text(welcome_frame, width=60, height=6)
+        debug_mode_code_paste_text_box.grid(row=2 , column = 0, pady = 10)
+
+        debug_mode_code_paste_text_box.insert("1.0", "Paste only the code related to your issue." )
+        debug_mode_code_paste_text_box.config(fg="gray")
+        debug_mode_code_paste_text_box.bind("<FocusIn>", clear_placeholder)
+
+        debug_mode_error_explanation_label = tk.Label(welcome_frame , text="What error do you get?" "\n"
+               "(Please paste the terminal explanation here)"
+        )
+        debug_mode_error_explanation_label.grid(row= 3,column=0, pady = 10)
+
+        debug_mode_error_explanation_text_box = tk.Text(welcome_frame, width=60, height=15)
+        debug_mode_error_explanation_text_box.grid(row=4 , column = 0, pady = 10)
+
+        debug_mode_error_explanation_text_box.insert(
+            "1.0",
+            "Example:\nTypeError: unsupported operand type(s)..."
+        )
+
+        debug_mode_error_explanation_text_box.config(fg="gray")
+        debug_mode_error_explanation_text_box.bind("<FocusIn>", clear_placeholder)
+
+        debug_error_button = tk.Button(welcome_frame, text="Debug", command=debug_mode)
+        debug_error_button.grid(row=5, column=0, pady=10)
+
+    def start_debug():
+        print("Debug Mode started")
+
+    learn_mode_button = tk.Button(
+        mode_frame,
+        text="Learn Mode",
+        command=learn_mode
+    )
+    learn_mode_button.pack(fill="x", pady=7)
+
+    debug_mode_button = tk.Button(
+        mode_frame,
+        text="Debug Mode",
+        command=debug_mode
+    )
+    debug_mode_button.pack(fill="x", pady=7)
+
+    hint_button = tk.Button(
+        mode_frame,
+        text="Hint Mode",
+        command=open_hint_mode
+    )
+    hint_button.pack(fill="x", pady=7)
+
+
+
+
     window.mainloop()
 
 main()
