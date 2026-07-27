@@ -448,11 +448,100 @@ def main():
         debug_mode_error_explanation_text_box.config(fg="gray")
         debug_mode_error_explanation_text_box.bind("<FocusIn>", clear_placeholder)
 
-        debug_error_button = tk.Button(welcome_frame, text="Debug", command=debug_mode)
+        debug_mode_error_explanation_text_box.config(fg="gray")
+        debug_mode_error_explanation_text_box.bind("<FocusIn>", clear_placeholder)
+
+        def start_debug():
+            print("Debug Mode started")
+
+            code = debug_mode_code_paste_text_box.get("1.0", "end").strip()
+            error = debug_mode_error_explanation_text_box.get("1.0", "end").strip()
+
+            if code == "" or code == "Paste only the code related to your issue.":
+                messagebox.showwarning(
+                    "Missing Information",
+                    "Please paste the relevant code here."
+
+                )
+                return
+            if error == "" or error == "Example:\nTypeError: unsupported operand type(s)...":
+                messagebox.showwarning(
+                    "Missing Information",
+                    "Please describe the error."
+                )
+                return
+
+            client = OpenAIClient()
+            debug_help = client.get_debug_help(code, error)
+            show_debug_session(code, error, debug_help)
+
+        debug_error_button = tk.Button(welcome_frame, text="Debug", command=start_debug)
         debug_error_button.grid(row=5, column=0, pady=10)
 
-    def start_debug():
-        print("Debug Mode started")
+
+
+    def show_debug_session( code , error , debug_help ):
+        clear_screen(welcome_frame)
+
+        show_debug_session_label = tk.Label(welcome_frame, text="Debug Session")
+        show_debug_session_label.grid(row = 0, column = 0, pady = 10)
+
+        your_error_label = tk.Label(welcome_frame, text="Your Error")
+        your_error_label.grid(row = 1, column = 0, pady = 10)
+
+        error_box = tk.Text(welcome_frame, width=60, height=6)
+        error_box.grid(row=2, column=0, pady=7)
+        error_box.insert("1.0", error)
+        error_box.config(state="disabled")
+
+        ai_analysis_label = tk.Label(welcome_frame, text="AI Analysis")
+        ai_analysis_label.grid(row = 3, column = 0, pady = 10)
+
+        ai_analysis_text_box = tk.Text(welcome_frame, width=60, height=6)
+        ai_analysis_text_box.grid(row=4 , column = 0, pady = 10)
+        ai_analysis_text_box.insert("1.0", debug_help)
+        ai_analysis_text_box.config(state="disabled")
+
+        help_label = tk.Label(welcome_frame, text="Still need help?")
+        help_label.grid(row = 5, column = 0, pady = 10)
+
+        another_question_text_box = tk.Text(welcome_frame, width=60, height=4 )
+        another_question_text_box.grid(row=6 , column = 0, pady = 10)
+
+        def ask_another_debug():
+            print("Ask Again clicked")
+            follow_up_question = another_question_text_box.get("1.0", "end").strip()
+
+            if not follow_up_question:
+                messagebox.showwarning(
+                    "Missing Information",
+                    "Please enter a follow-up question."
+                )
+                return
+
+            client = OpenAIClient()
+
+            new_debug_help = client.get_follow_up_debug(
+                code,
+                error,
+                debug_help,
+                follow_up_question
+            )
+            print(new_debug_help)
+
+
+            ai_analysis_text_box.config(state="normal")
+            ai_analysis_text_box.delete("1.0", "end")
+            ai_analysis_text_box.insert("1.0", new_debug_help)
+            ai_analysis_text_box.config(state="disabled")
+
+        ask_again_button = tk.Button(
+            welcome_frame,
+            text="Ask Again",
+            command=ask_another_debug
+        )
+        ask_again_button.grid(row=7, column=0, pady=10)
+
 
     learn_mode_button = tk.Button(
         mode_frame,

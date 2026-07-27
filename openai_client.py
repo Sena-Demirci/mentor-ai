@@ -6,6 +6,8 @@ from mentor_prompts import HINT_PROMPT, QUESTION_PROMPT, SOLUTION_PROMPT
 from mentor_prompts import LEARN_PROMPT
 from mentor_prompts import FOLLOW_UP_PROMPT
 from mentor_prompts import FOLLOW_UP_HINT_PROMPT
+from mentor_prompts import DEBUG_PROMPT
+from mentor_prompts import FOLLOW_UP_DEBUG_PROMPT
 
 
 class OpenAIClient(AIClient):
@@ -134,6 +136,58 @@ class OpenAIClient(AIClient):
                 "Please try again later."
             )
 
+    def get_debug_help(self, code, error):
+        messages = [
+            {"role": "system", "content": DEBUG_PROMPT},
+            {"role": "user", "content": f"My code: \n{code}"},
+            {"role": "user", "content": f"Error: \n{error}"},
+        ]
+        try:
+            response = self.client.chat.completions.create(
+                model="gpt-4.1-mini",
+                messages = messages
+            )
+
+            return response.choices[0].message.content
+        except Exception:
+            return(
+                "I couldn't reach the AI right now.\n\n"
+                "Please try again later."
+            )
+
+    def get_follow_up_debug(
+            self,
+            code,
+            error,
+            previous_debug,
+            follow_up_question
+    ):
+        messages = [
+            {"role": "system", "content": FOLLOW_UP_DEBUG_PROMPT},
+            {"role": "user", "content": f"My code:\n{code}"},
+            {"role": "user", "content": f"Error:\n{error}"},
+            {"role": "assistant", "content": previous_debug},
+            {"role": "user", "content": follow_up_question}
+        ]
+
+        try:
+            response = self.client.chat.completions.create(
+                model="gpt-4.1-mini",
+                messages=messages
+            )
+
+            return response.choices[0].message.content
+
+
+
+        except Exception:
+
+            return (
+
+                "I couldn't reach the AI right now.\n\n"
+                "Please try again later."
+
+            )
 
 
 
