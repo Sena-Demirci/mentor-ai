@@ -4,6 +4,10 @@ from logging import disable
 from tkinter import messagebox
 from tkinter import ttk
 from settings_manager import *
+from file_manager import *
+from file_manager import open_file
+from file_manager import save_file
+from file_manager import exit_app
 
 
 
@@ -15,10 +19,14 @@ def main():
 
     settings = load_settings()
 
+    navigation_stack = []
+
     top_frame = tk.Frame(window, bg="#181818")
     top_frame.pack(fill = "x")
+
     button1 = tk.Button(top_frame, text = "File")
     button1.pack(side = "left")
+
 
     main_frame = tk.Frame(window)
     main_frame.pack(fill="both", expand=True)
@@ -28,8 +36,62 @@ def main():
     right_frame = tk.Frame(main_frame, width=400, height=700, bg="#dcdcdc")
     right_frame.pack(side="right",fill="both" ,expand =True)
 
-    code_editor = tk.Text(left_frame, width = 100, height= 700)
-    code_editor.pack(fill = "both")
+    code_editor = tk.Text(left_frame, width=100, height=700)
+    code_editor.pack(fill="both")
+
+
+
+    def new_session_gui():
+        code_editor.delete("1.0", tk.END)
+
+
+
+    def open_file_gui():
+        content = open_file()
+
+        if content is None:
+            return
+
+        code_editor.delete("1.0", tk.END)
+        code_editor.insert("1.0", content)
+
+
+
+    def save_file_gui():
+        content = code_editor.get("1.0", tk.END)
+        save_file(content)
+
+    file_menu = tk.Menu(window, tearoff=0)
+
+    file_menu.add_command(
+        label="New Session",
+        command=new_session_gui
+    )
+
+    file_menu.add_command(
+        label="Open File",
+        command=open_file_gui
+    )
+
+    file_menu.add_command(
+        label="Save",
+        command=save_file_gui
+    )
+
+    file_menu.add_separator()
+
+    file_menu.add_command(
+        label="Exit",
+        command=lambda: exit_app(window)
+    )
+
+
+
+    def show_file_menu(event):
+        file_menu.tk_popup(event.x_root, event.y_root)
+
+    button1.bind("<Button-1>", show_file_menu)
+
 
     content_frame = tk.Frame(right_frame)
     content_frame.pack(fill = "both", expand= True)
@@ -50,8 +112,18 @@ def main():
     goal_label.grid(row=3, column=0)
 
 
+
     def plan_mode():
         clear_screen(welcome_frame)
+
+        clear_screen(welcome_frame)
+
+        back_button = tk.Button(
+            welcome_frame,
+            text="← Back",
+            command=home_screen
+        )
+        back_button.grid(row=0, column=0, sticky="nw", padx=10, pady=10)
 
         plan_it_label = tk.Label(welcome_frame, text="Let's Plan It!")
         plan_it_label.grid(row=0, column=0, pady=7)
@@ -65,8 +137,20 @@ def main():
         continue_button = tk.Button(welcome_frame, text = "Continue", command = lambda: continue_mode(text_box))
         continue_button.grid(row=3, column=0, pady = 7)
 
+
+
+
     def conversation_screen(project):
         clear_screen(welcome_frame)
+
+
+        back_button = tk.Button(
+            welcome_frame,
+            text="← Back",
+            command=plan_mode
+        )
+        back_button.grid(row=0, column=0, sticky="nw", padx=10, pady=10)
+
 
         planning_session_label = tk.Label(welcome_frame, text="Planning Session")
         planning_session_label.grid(row=0, column=0, pady=7)
@@ -82,6 +166,7 @@ def main():
 
         project_text_box.insert("1.0", project)
 
+
         continue_button = tk.Button( welcome_frame,
             text="Continue",
             command=lambda: next_question(project_text_box)
@@ -89,9 +174,12 @@ def main():
         continue_button.grid(row=4, column=0, pady=7)
 
 
+
+
     def next_question(project_text_box):
         project = project_text_box.get("1.0", "end").strip()
         print(project)
+
 
 
     def continue_mode(text_box):
@@ -101,9 +189,65 @@ def main():
         conversation_screen(project)
 
 
+
     def clear_screen(frame):
         for widget in frame.winfo_children():
             widget.destroy()
+
+
+    def home_screen():
+        clear_screen(welcome_frame)
+
+        title_label = tk.Label(welcome_frame, text="Mentor AI")
+        title_label.grid(row=0, column=0)
+
+        subtitle_label = tk.Label(welcome_frame, text="Think. Build. Learn.")
+        subtitle_label.grid(row=1, column=0)
+
+        goal_label = tk.Label(welcome_frame, text="What would you like to work on today?")
+        goal_label.grid(row=3, column=0)
+
+        goal_entry = tk.Entry(welcome_frame)
+        goal_entry.grid(row=4, column=0)
+
+
+        start_button = tk.Button(
+            welcome_frame,
+            text="Start",
+            command=start_ai
+        )
+        start_button.grid(row=5, column=0)
+
+        mode_frame = tk.Frame(welcome_frame)
+        mode_frame.grid(row=6, column=0, pady=20)
+
+        tk.Button(
+            mode_frame,
+            text="Start a New Project",
+            command=plan_mode
+        ).pack(fill="x", pady=7)
+
+        tk.Button(
+            mode_frame,
+            text="Learn Mode",
+            command=learn_mode
+        ).pack(fill="x", pady=7)
+
+        tk.Button(
+            mode_frame,
+            text="Debug Mode",
+            command=debug_mode
+        ).pack(fill="x", pady=7)
+
+        tk.Button(
+            mode_frame,
+            text="Hint Mode",
+            command=open_hint_mode
+        ).pack(fill="x", pady=7)
+
+
+    def back_to_home():
+        home_screen()
 
 
     goal_entry = tk.Entry(welcome_frame)
@@ -122,13 +266,20 @@ def main():
     mode_frame.grid(row=6, column=0, pady=20)
 
     project_button = tk.Button(mode_frame,
-        text="Start a New Project"  , command=plan_mode
+        text="Start a New Project"  ,command=plan_mode
     )
     project_button.pack(fill="x" , pady=7)
 
     def open_settings():
 
         clear_screen(welcome_frame)
+
+        back_button = tk.Button(
+            welcome_frame,
+            text="← Back",
+            command=home_screen
+        )
+        back_button.grid(row=0, column=0, sticky="nw", padx=10, pady=10)
 
         settings_title = tk.Label(
             welcome_frame,
@@ -261,6 +412,7 @@ def main():
         )
 
         def reset_gui_settings():
+
             reset_settings()
 
             settings.clear()
@@ -306,6 +458,7 @@ def main():
         built_label = tk.Label(welcome_frame, text="Built with Python & Tkinter")
         built_label.grid(row=14, column=0, pady=7)
 
+
     settings_button = tk.Button(
         top_frame,
         text="⚙",
@@ -317,15 +470,23 @@ def main():
     settings_button.pack(side="right", padx=15)
 
 
-
-
-
-
-
     def learn_mode():
         global learn_mode_text_box
 
         clear_screen(welcome_frame)
+
+        back_button = tk.Button(
+            welcome_frame,
+            text="← Back",
+            command=home_screen
+        )
+        back_button.grid(row=0, column=0, sticky="nw", padx=10, pady=10)
+
+        learn_mode_title_label = tk.Label(
+            welcome_frame,
+            text="Learn Mode"
+        )
+        learn_mode_title_label.grid(row=1, column=0, pady=7)
 
         learn_mode_title_label = tk.Label(welcome_frame, text="Learn Mode")
         learn_mode_title_label.grid(row=0, column=0, pady=7)
@@ -336,9 +497,12 @@ def main():
         learn_mode_text_box = tk.Text(welcome_frame, width=50, height=7)
         learn_mode_text_box.grid(row=2, column=0, pady=7)
 
-        learn_mode_button = tk.Button(welcome_frame,text="Continue",command = start_learning)
-        learn_mode_button.grid(row=3, column=0 , pady=7)
-
+        learn_mode_button = tk.Button(
+            welcome_frame,
+            text="Continue",
+            command=start_learning
+        )
+        learn_mode_button.grid(row=3, column=0, pady=7)
 
     def start_learning():
         global follow_up_text
@@ -351,6 +515,14 @@ def main():
         ai_response = generate_explanation(topic)
 
         clear_screen(welcome_frame)
+
+        back_button = tk.Button(
+            welcome_frame,
+            text="← Back",
+            command=learn_mode
+        )
+        back_button.grid(row=0, column=0, sticky="nw", padx=10, pady=10)
+
 
         learn_session_label = tk.Label(welcome_frame, text="Learn Session")
         learn_session_label.grid(row=0, column=0, pady=7)
@@ -429,22 +601,34 @@ def main():
 
         clear_screen(welcome_frame)
 
-        clear_screen(welcome_frame)
+        back_button = tk.Button(
+            welcome_frame,
+            text="← Back",
+            command=home_screen
+        )
+
+        back_button.grid(row=0, column=0, sticky="nw", padx=10, pady=10)
+
 
         hint_mode_title_label = tk.Label(welcome_frame, text="Hint Mode")
         hint_mode_title_label.grid(row=0, column=0, pady=7)
 
+
         hint_mode_question_label = tk.Label(welcome_frame, text="What are you building?")
         hint_mode_question_label.grid(row=1, column=0, pady=7)
+
 
         hint_mode_first_text_box = tk.Text(welcome_frame, width=50, height=4)
         hint_mode_first_text_box.grid(row=2, column=0, pady=7)
 
+
         hint_mode_problem_label = tk.Label(welcome_frame, text="Where are you stuck?")
         hint_mode_problem_label.grid(row=3, column=0, pady=(10, 3))
 
+
         hint_mode_second_text_box = tk.Text(welcome_frame, width=50, height=4)
         hint_mode_second_text_box.grid(row=4, column=0, pady=(0, 10))
+
 
         hint_mode_second_text_box.insert(
             "1.0",
@@ -555,8 +739,19 @@ def main():
     def show_hint_session(building, problem, code, hint):
         print("show_hint_session called")
         clear_screen(welcome_frame)
+
+        back_button = tk.Button(
+            welcome_frame,
+            text="← Back",
+            command=open_hint_mode
+        )
+
+        back_button.grid(row=0, column=0, sticky="nw", padx=10, pady=10)
+
+
         title = tk.Label(welcome_frame, text="Hint Session")
         title.grid(row=0, column=0, pady=10)
+
 
         building_label = tk.Label(
             welcome_frame,
@@ -564,11 +759,14 @@ def main():
         )
         building_label.grid(row=1, column=0, pady=7)
 
+
         hint_box = tk.Text(welcome_frame, width=60, height=15)
         hint_box.grid(row=2, column=0, pady=7)
 
         hint_box.insert("1.0", hint)
         hint_box.config(state="disabled")
+
+
 
         follow_up_label = tk.Label(
             welcome_frame,
@@ -576,12 +774,14 @@ def main():
         )
         follow_up_label.grid(row=3, column=0, pady=(15, 5))
 
+
         follow_up_box = tk.Text(
             welcome_frame,
             width=60,
             height=4
         )
         follow_up_box.grid(row=4, column=0, pady=5)
+
 
         def ask_another_hint():
             follow_up_question = follow_up_box.get("1.0", "end").strip()
@@ -593,6 +793,8 @@ def main():
                 )
                 return
 
+
+
             client = OpenAIClient()
 
             new_hint = client.get_follow_up_hint(
@@ -603,10 +805,12 @@ def main():
                 follow_up_question
             )
 
+
             hint_box.config(state="normal")
             hint_box.delete("1.0", "end")
             hint_box.insert("1.0", new_hint)
             hint_box.config(state="disabled")
+
 
         follow_up_button = tk.Button(
             welcome_frame,
@@ -621,6 +825,15 @@ def main():
 
         clear_screen(welcome_frame)
 
+
+        back_button = tk.Button(
+            welcome_frame,
+            text="← Back",
+            command=home_screen
+        )
+        back_button.grid(row=0, column=0, sticky="nw", padx=10, pady=10)
+
+
         debug_mode_label = tk.Label(welcome_frame, text="Debug Mode")
         debug_mode_label.grid(row = 0, column = 0, pady = 10)
 
@@ -634,13 +847,16 @@ def main():
         debug_mode_code_paste_text_box.config(fg="gray")
         debug_mode_code_paste_text_box.bind("<FocusIn>", clear_placeholder)
 
+
         debug_mode_error_explanation_label = tk.Label(welcome_frame , text="What error do you get?" "\n"
                "(Please paste the terminal explanation here)"
         )
         debug_mode_error_explanation_label.grid(row= 3,column=0, pady = 10)
 
+
         debug_mode_error_explanation_text_box = tk.Text(welcome_frame, width=60, height=15)
         debug_mode_error_explanation_text_box.grid(row=4 , column = 0, pady = 10)
+
 
         debug_mode_error_explanation_text_box.insert(
             "1.0",
@@ -653,11 +869,13 @@ def main():
         debug_mode_error_explanation_text_box.config(fg="gray")
         debug_mode_error_explanation_text_box.bind("<FocusIn>", clear_placeholder)
 
+
         def start_debug():
             print("Debug Mode started")
 
             code = debug_mode_code_paste_text_box.get("1.0", "end").strip()
             error = debug_mode_error_explanation_text_box.get("1.0", "end").strip()
+
 
             if code == "" or code == "Paste only the code related to your issue.":
                 messagebox.showwarning(
@@ -677,6 +895,7 @@ def main():
             debug_help = client.get_debug_help(code, error)
             show_debug_session(code, error, debug_help)
 
+
         debug_error_button = tk.Button(welcome_frame, text="Debug", command=start_debug)
         debug_error_button.grid(row=5, column=0, pady=10)
 
@@ -684,6 +903,13 @@ def main():
 
     def show_debug_session( code , error , debug_help ):
         clear_screen(welcome_frame)
+
+        back_button = tk.Button(
+            welcome_frame,
+            text="← Back",
+            command=debug_mode
+        )
+        back_button.grid(row=0, column=0, sticky="nw", padx=10, pady=10)
 
         show_debug_session_label = tk.Label(welcome_frame, text="Debug Session")
         show_debug_session_label.grid(row = 0, column = 0, pady = 10)
@@ -699,10 +925,12 @@ def main():
         ai_analysis_label = tk.Label(welcome_frame, text="AI Analysis")
         ai_analysis_label.grid(row = 3, column = 0, pady = 10)
 
+
         ai_analysis_text_box = tk.Text(welcome_frame, width=60, height=6)
         ai_analysis_text_box.grid(row=4 , column = 0, pady = 10)
         ai_analysis_text_box.insert("1.0", debug_help)
         ai_analysis_text_box.config(state="disabled")
+
 
         help_label = tk.Label(welcome_frame, text="Still need help?")
         help_label.grid(row = 5, column = 0, pady = 10)
@@ -710,9 +938,11 @@ def main():
         another_question_text_box = tk.Text(welcome_frame, width=60, height=4 )
         another_question_text_box.grid(row=6 , column = 0, pady = 10)
 
+
         def ask_another_debug():
             print("Ask Again clicked")
             follow_up_question = another_question_text_box.get("1.0", "end").strip()
+
 
             if not follow_up_question:
                 messagebox.showwarning(
@@ -737,6 +967,7 @@ def main():
             ai_analysis_text_box.insert("1.0", new_debug_help)
             ai_analysis_text_box.config(state="disabled")
 
+
         ask_again_button = tk.Button(
             welcome_frame,
             text="Ask Again",
@@ -748,9 +979,10 @@ def main():
     learn_mode_button = tk.Button(
         mode_frame,
         text="Learn Mode",
-        command=learn_mode
+        command=lambda: learn_mode
     )
     learn_mode_button.pack(fill="x", pady=7)
+
 
     debug_mode_button = tk.Button(
         mode_frame,
@@ -759,15 +991,16 @@ def main():
     )
     debug_mode_button.pack(fill="x", pady=7)
 
+
+
     hint_button = tk.Button(
         mode_frame,
         text="Hint Mode",
-        command=open_hint_mode
+        command=lambda: open_hint_mode
     )
     hint_button.pack(fill="x", pady=7)
 
-
-
+    navigation_stack.append(home_screen)
 
     window.mainloop()
 
