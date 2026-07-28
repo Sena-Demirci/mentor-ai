@@ -256,7 +256,6 @@ def main():
     def start_ai():
         print(goal_entry.get())
 
-
     start_button = tk.Button(welcome_frame, text = "Start",
                              command = start_ai)
 
