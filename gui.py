@@ -2,12 +2,18 @@ import tkinter as tk
 from openai_client import OpenAIClient
 from logging import disable
 from tkinter import messagebox
+from tkinter import ttk
+from settings_manager import *
+
+
 
 
 def main():
     window = tk.Tk()
     window.title("Mentor AI")
     window.geometry("1200x700")
+
+    settings = load_settings()
 
     top_frame = tk.Frame(window, bg="#181818")
     top_frame.pack(fill = "x")
@@ -119,6 +125,202 @@ def main():
         text="Start a New Project"  , command=plan_mode
     )
     project_button.pack(fill="x" , pady=7)
+
+    def open_settings():
+
+        clear_screen(welcome_frame)
+
+        settings_title = tk.Label(
+            welcome_frame,
+            text="Settings",
+            font=("Arial", 18, "bold")
+        )
+        settings_title.grid(row=0, column=0, pady=(15, 20))
+
+        # ---------------- AI ----------------
+
+        ai_label = tk.Label(
+            welcome_frame,
+            text="AI Model"
+        )
+        ai_label.grid(
+            row=1,
+            column=0,
+            sticky="w",
+            padx=20
+        )
+
+        model_combobox = ttk.Combobox(
+            welcome_frame,
+            values=[
+                "GPT-4.1 Mini"
+            ],
+            state="readonly",
+            width=25
+        )
+
+
+        model_combobox.grid(
+            row=2,
+            column=0,
+            padx=20,
+            pady=(5, 20),
+            sticky="w"
+        )
+
+        # ---------------- Appearance ----------------
+
+        theme_label = tk.Label(
+            welcome_frame,
+            text="Theme"
+        )
+
+        theme_label.grid(
+            row=3,
+            column=0,
+            sticky="w",
+            padx=20
+        )
+
+        theme_combobox = ttk.Combobox(
+            welcome_frame,
+            values=[
+                "Light",
+                "Dark",
+                "System (Coming Soon)"
+            ],
+            state="readonly",
+            width=25
+        )
+
+        theme_combobox.grid(
+            row=4,
+            column=0,
+            padx=20,
+            pady=(5, 20),
+            sticky="w"
+        )
+
+        font_label = tk.Label(
+            welcome_frame,
+            text="Font Size"
+        )
+
+        font_label.grid(
+            row=5,
+            column=0,
+            sticky="w",
+            padx=20
+        )
+
+        font_combobox = ttk.Combobox(
+            welcome_frame,
+            values=[
+                "Small",
+                "Medium",
+                "Large"
+            ],
+            state="readonly",
+            width=25
+        )
+
+        font_combobox.grid(
+            row=6,
+            column=0,
+            padx=20,
+            pady=(5, 20),
+            sticky="w"
+        )
+
+        model_combobox.set(settings["model"])
+        theme_combobox.set(settings["theme"])
+        font_combobox.set(settings["font_size"])
+
+
+        def save_gui_settings():
+            settings["model"] = model_combobox.get()
+            settings["theme"] = theme_combobox.get()
+            settings["font_size"] = font_combobox.get()
+
+            save_settings(settings)
+
+            messagebox.showinfo(
+                "Settings",
+                "Settings saved successfully."
+            )
+
+        save_button = tk.Button(
+            welcome_frame,
+            text="Save Settings",
+            command=save_gui_settings
+        )
+        save_button.grid(
+            row=7,
+            column=0,
+            pady=20
+        )
+
+        def reset_gui_settings():
+            reset_settings()
+
+            settings.clear()
+            settings.update(load_settings())
+
+            model_combobox.set(settings["model"])
+            theme_combobox.set(settings["theme"])
+            font_combobox.set(settings["font_size"])
+
+            messagebox.showinfo(
+                "Settings",
+                "Settings restored to default."
+            )
+
+        reset_button = tk.Button(
+            welcome_frame,
+            text="Reset",
+            command=reset_gui_settings
+        )
+
+        reset_button.grid(row=8, column=0, pady=5)
+
+        about_title = tk.Label(
+            welcome_frame,
+            text="About",
+            font=("Arial", 12, "bold")
+        )
+
+        about_title.grid(row=9, column=0, pady=12)
+
+        mentor_ai_title_label = tk.Label(welcome_frame, text="Mentor AI")
+        mentor_ai_title_label.grid(row=10, column=0, pady= 10)
+
+        version1_label = tk.Label(welcome_frame, text="Version 1.0")
+        version1_label.grid(row=11, column=0, pady=10)
+
+        developer_label = tk.Label(welcome_frame, text="Developer")
+        developer_label.grid(row=12, column=0, pady=7)
+
+        founder_of_mentor_ai_label = tk.Label(welcome_frame, text="Sena DEMİRCİ")
+        founder_of_mentor_ai_label.grid(row=13, column=0, pady=7)
+
+        built_label = tk.Label(welcome_frame, text="Built with Python & Tkinter")
+        built_label.grid(row=14, column=0, pady=7)
+
+    settings_button = tk.Button(
+        top_frame,
+        text="⚙",
+        font=("Arial", 16),
+        command=open_settings,
+        borderwidth=0
+    )
+
+    settings_button.pack(side="right", padx=15)
+
+
+
+
+
+
 
     def learn_mode():
         global learn_mode_text_box
