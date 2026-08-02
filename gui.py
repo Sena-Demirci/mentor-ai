@@ -12,7 +12,6 @@ from ui.colors import *
 from ui.fonts import *
 from ui.sizes import *
 
-from ui.ui.fonts import HEADING_FONT
 
 
 def main():
