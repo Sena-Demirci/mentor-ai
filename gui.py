@@ -11,6 +11,7 @@ from file_manager import exit_app
 from ui.colors import *
 from ui.fonts import *
 from ui.sizes import *
+from ui.ai_input import create_ai_input
 
 
 
@@ -266,18 +267,41 @@ def main():
     def home_screen():
         clear_screen(welcome_frame)
 
-        title_label = tk.Label(welcome_frame, text="Mentor AI")
+        title_label = tk.Label(
+            welcome_frame,
+            text="Mentor AI",
+            bg=DRACULA_PANEL_BG,
+            fg=TEXT,
+            font=TITLE_FONT
+        )
         title_label.grid(row=0, column=0)
 
-        subtitle_label = tk.Label(welcome_frame, text="Think. Build. Learn.")
+        subtitle_label = tk.Label(
+            welcome_frame,
+            text="Think. Build. Learn.",
+            bg=DRACULA_PANEL_BG,
+            fg=TEXT_SECONDARY,
+            font=BODY_FONT
+        )
         subtitle_label.grid(row=1, column=0)
 
-        goal_label = tk.Label(welcome_frame, text="What would you like to work on today?")
+        goal_label = tk.Label(
+            welcome_frame,
+            text="What would you like to work on today?",
+            bg=DRACULA_PANEL_BG,
+            fg=TEXT,
+            font=BODY_FONT
+        )
         goal_label.grid(row=3, column=0)
 
-        goal_entry = tk.Entry(welcome_frame)
-        goal_entry.grid(row=4, column=0)
+        ai_input = create_ai_input(welcome_frame)
 
+        ai_input.grid(
+            row=4,
+            column=0,
+            padx=20,
+            pady=20
+        )
 
         start_button = tk.Button(
             welcome_frame,
@@ -320,6 +344,7 @@ def main():
 
     goal_entry = tk.Entry(welcome_frame)
     goal_entry.grid(row=4, column=0)
+
 
     def start_ai():
         print(goal_entry.get())
@@ -1120,6 +1145,8 @@ def main():
     hint_button.pack(fill="x", pady=7)
 
     navigation_stack.append(home_screen)
+
+    home_screen()
 
     window.mainloop()
 
