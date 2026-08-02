@@ -14,7 +14,6 @@ from ui.sizes import *
 from ui.ai_input import create_ai_input
 
 
-
 def main():
     window = tk.Tk()
     window.title("Mentor AI")

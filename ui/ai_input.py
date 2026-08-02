@@ -4,29 +4,34 @@ from ui.colors import *
 from ui.fonts import *
 from ui.sizes import *
 
+
+
 from ui.buttons import create_send_button
 
 
-from ui.ai_card import AICard
-
 
 def create_ai_input(parent):
+    card = tk.Frame(
+        parent,
+        width=AI_INPUT_WIDTH,
+        height=AI_INPUT_HEIGHT,
+        bg=AI_CARD_BG
+    )
 
-    card = AICard(parent)
+    card.pack_propagate(False)
 
     # ==========================
     # Header
     # ==========================
 
     header_frame = tk.Frame(
-        card.content,
+        card,
         bg=AI_CARD_BG
     )
 
     header_frame.pack(
         fill="x",
-        padx=12,
-        pady=(10, 5)
+        pady=(0, 12)
     )
 
     ai_label = tk.Label(
@@ -56,7 +61,7 @@ def create_ai_input(parent):
     # ==========================
 
     input_text = tk.Text(
-        card.content,
+        card,
         bg=AI_CARD_BG,
         fg=TEXT,
         font=AI_INPUT_FONT,
@@ -67,26 +72,32 @@ def create_ai_input(parent):
 
     input_text.pack(
         fill="x",
-        padx=12,
-        pady=(0, 10)
+        pady=(0, 12)
     )
 
     input_text.config(height=6)
 
     bottom_frame = tk.Frame(
-        card.content,
+        card,
         bg=AI_CARD_BG
     )
 
     bottom_frame.pack(
         fill="x",
-        padx=12,
         pady=(0, 10)
     )
 
-    send_button = create_send_button(bottom_frame)
 
-    send_button.pack(side="right")
+    send_button = create_send_button(
+        bottom_frame)
+
+    send_button.pack(
+        side="right",
+        ipadx=2,
+        ipady=1
+    )
+
+
 
 
 

@@ -3,19 +3,25 @@ from PIL import Image, ImageDraw
 
 def create_ai_gradient(width, height):
 
-    image = Image.new("RGBA", (width, height), (31, 33, 40, 255))
+    image = Image.new(
+        "RGB",
+        (width, height),
+        "#1A1B24"
+    )
 
-    pixels = image.load()
+    draw = ImageDraw.Draw(image)
 
-    for y in range(height):
-        for x in range(width):
+    for i in range(height):
 
-            distance = (x + y) / (width + height)
+        ratio = i / height
 
-            alpha = int((1 - distance) * 35)
+        r = int(26 - ratio * 6)
+        g = int(27 - ratio * 6)
+        b = int(36 - ratio * 8)
 
-            alpha = max(0, min(alpha, 35))
-
-            pixels[x, y] = (255, 255, 255, alpha)
+        draw.line(
+            (0, i, width, i),
+            fill=(r, g, b)
+        )
 
     return image

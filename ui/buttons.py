@@ -10,15 +10,17 @@ def create_send_button(parent, command=None):
         parent,
         text="↑",
         command=command,
-        bg="#BD93F9",
+        bg=SEND_BUTTON,
         fg="white",
-        font=("Segoe UI", 12, "bold"),
-        width=2,
-        height=1,
-        borderwidth=0,
+        activebackground=SEND_BUTTON_HOVER,
+        activeforeground="white",
+        relief="flat",
+        bd=0,
+        highlightthickness=0,
+        font=("Segoe UI Symbol", 11, "bold"),
         cursor="hand2",
-        activebackground="#C9A7FF",
-        activeforeground="white"
+        padx=8,
+        pady=4
     )
 
     return button
