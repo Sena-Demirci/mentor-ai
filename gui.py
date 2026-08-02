@@ -8,35 +8,58 @@ from file_manager import *
 from file_manager import open_file
 from file_manager import save_file
 from file_manager import exit_app
+from ui.colors import *
+from ui.fonts import *
+from ui.sizes import *
 
-
+from ui.ui.fonts import HEADING_FONT
 
 
 def main():
     window = tk.Tk()
     window.title("Mentor AI")
-    window.geometry("1200x700")
+    window.geometry(f"{WINDOW_WIDTH}x{WINDOW_HEIGHT}")
 
     settings = load_settings()
 
     navigation_stack = []
 
-    top_frame = tk.Frame(window, bg="#181818")
+    top_frame = tk.Frame(window, bg=DRACULA_WINDOW_BG)
     top_frame.pack(fill = "x")
 
     button1 = tk.Button(top_frame, text = "File")
     button1.pack(side = "left")
 
 
-    main_frame = tk.Frame(window)
+    main_frame = tk.Frame(window, bg=DRACULA_WINDOW_BG )
     main_frame.pack(fill="both", expand=True)
 
-    left_frame = tk.Frame(main_frame, width= 800, height=700)
+    left_frame = tk.Frame( main_frame,
+        width=LEFT_PANEL_WIDTH,
+        height=WINDOW_HEIGHT,
+        bg=DRACULA_EDITOR_BG
+    )
+
     left_frame.pack(side = "left" , fill="both",expand=True)
-    right_frame = tk.Frame(main_frame, width=400, height=700, bg="#dcdcdc")
+
+    right_frame = tk.Frame(main_frame,
+        width=RIGHT_PANEL_WIDTH,
+        height=700,
+        bg= DRACULA_PANEL_BG )
+
     right_frame.pack(side="right",fill="both" ,expand =True)
 
-    code_editor = tk.Text(left_frame, width=100, height=700)
+    code_editor = tk.Text(
+        left_frame,
+        width=EDITOR_WIDTH,
+        height=EDITOR_HEIGHT,
+        bg=DRACULA_EDITOR_BG,
+        fg=TEXT,
+        font=CODE_FONT,
+        insertbackground=EDITOR_CURSOR,
+        selectbackground=EDITOR_SELECTION,
+        borderwidth=0
+    )
     code_editor.pack(fill="both")
 
 
@@ -93,22 +116,39 @@ def main():
     button1.bind("<Button-1>", show_file_menu)
 
 
-    content_frame = tk.Frame(right_frame)
+    content_frame = tk.Frame(right_frame,  bg=DRACULA_PANEL_BG)
     content_frame.pack(fill = "both", expand= True)
 
-    welcome_frame = tk.Frame(content_frame)
+    welcome_frame = tk.Frame(content_frame, bg=DRACULA_PANEL_BG)
     welcome_frame.pack(fill = "both" , expand = True)
 
     welcome_frame.columnconfigure(0, weight=1)
 
-
-    title_label=tk.Label(welcome_frame, text = "Mentor AI")
+    title_label = tk.Label(
+        welcome_frame,
+        text="Mentor AI",
+        bg=DRACULA_PANEL_BG,
+        fg=TEXT,
+        font=TITLE_FONT
+    )
     title_label.grid(row=0, column=0)
 
-    subtitle_label = tk.Label(welcome_frame, text="Think. Build. Learn.")
+    subtitle_label = tk.Label(
+        welcome_frame,
+        text="Think. Build. Learn.",
+        bg=DRACULA_PANEL_BG,
+        fg=TEXT_SECONDARY,
+        font=BODY_FONT
+    )
     subtitle_label.grid(row=1, column=0)
 
-    goal_label = tk.Label(welcome_frame , text = "What would you like to work on today?")
+    goal_label = tk.Label(
+        welcome_frame,
+        text="What would you like to work on today?",
+        bg=DRACULA_PANEL_BG,
+        fg=TEXT,
+        font=BODY_FONT
+    )
     goal_label.grid(row=3, column=0)
 
 
@@ -125,10 +165,22 @@ def main():
         )
         back_button.grid(row=0, column=0, sticky="nw", padx=10, pady=10)
 
-        plan_it_label = tk.Label(welcome_frame, text="Let's Plan It!")
+        plan_it_label = tk.Label(
+            welcome_frame,
+            text="Let's Plan It!",
+            bg=DRACULA_PANEL_BG,
+            fg=TEXT,
+            font=HEADING_FONT
+        )
         plan_it_label.grid(row=0, column=0, pady=7)
 
-        describe_label = tk.Label(welcome_frame, text = "What are you trying to build?")
+        describe_label = tk.Label(
+            welcome_frame,
+            text="What are you trying to build?",
+            bg=DRACULA_PANEL_BG,
+            fg=TEXT,
+            font=BODY_FONT
+        )
         describe_label.grid(row=1, column=0, pady = 5)
 
         text_box = tk.Text(welcome_frame,width = 50 , height= 7)
@@ -151,14 +203,31 @@ def main():
         )
         back_button.grid(row=0, column=0, sticky="nw", padx=10, pady=10)
 
-
-        planning_session_label = tk.Label(welcome_frame, text="Planning Session")
+        planning_session_label = tk.Label(
+            welcome_frame,
+            text="Planning Session",
+            bg=DRACULA_PANEL_BG,
+            fg=TEXT,
+            font=HEADING_FONT
+        )
         planning_session_label.grid(row=0, column=0, pady=7)
 
-        project_idea_label = tk.Label(welcome_frame, text="Project Idea")
+        project_idea_label = tk.Label(
+            welcome_frame,
+            text="Project Idea",
+            bg=DRACULA_PANEL_BG,
+            fg=TEXT,
+            font=BODY_FONT
+        )
         project_idea_label.grid(row=1, column=0, pady=7)
 
-        ai_explanaition_label = tk.Label(welcome_frame, text="Great! Let's understand your project together.")
+        ai_explanaition_label = tk.Label(
+            welcome_frame,
+            text="Great! Let's understand your project together.",
+            bg=DRACULA_PANEL_BG,
+            fg=TEXT_SECONDARY,
+            font=BODY_FONT
+        )
         ai_explanaition_label.grid(row=3, column=0, pady=7)
 
         project_text_box = tk.Text(welcome_frame, width=50, height=7)
@@ -283,16 +352,21 @@ def main():
         settings_title = tk.Label(
             welcome_frame,
             text="Settings",
-            font=("Arial", 18, "bold")
+            bg=DRACULA_PANEL_BG,
+            fg=TEXT,
+            font=TITLE_FONT
         )
-        settings_title.grid(row=0, column=0, pady=(15, 20))
 
-        # ---------------- AI ----------------
+        settings_title.grid(row=0, column=0, pady=(15, 20))
 
         ai_label = tk.Label(
             welcome_frame,
-            text="AI Model"
+            text="AI Model",
+            bg=DRACULA_PANEL_BG,
+            fg=TEXT,
+            font=BODY_FONT
         )
+
         ai_label.grid(
             row=1,
             column=0,
@@ -322,7 +396,10 @@ def main():
 
         theme_label = tk.Label(
             welcome_frame,
-            text="Theme"
+            text="Theme",
+            bg=DRACULA_PANEL_BG,
+            fg=TEXT,
+            font=BODY_FONT
         )
 
         theme_label.grid(
@@ -353,7 +430,10 @@ def main():
 
         font_label = tk.Label(
             welcome_frame,
-            text="Font Size"
+            text="Font Size",
+            bg=DRACULA_PANEL_BG,
+            fg=TEXT,
+            font=BODY_FONT
         )
 
         font_label.grid(
@@ -437,7 +517,9 @@ def main():
         about_title = tk.Label(
             welcome_frame,
             text="About",
-            font=("Arial", 12, "bold")
+            bg=DRACULA_PANEL_BG,
+            fg=TEXT,
+            font=HEADING_FONT
         )
 
         about_title.grid(row=9, column=0, pady=12)
@@ -483,14 +565,21 @@ def main():
 
         learn_mode_title_label = tk.Label(
             welcome_frame,
-            text="Learn Mode"
+            text="Learn Mode",
+            bg=DRACULA_PANEL_BG,
+            fg=TEXT,
+            font=HEADING_FONT
         )
-        learn_mode_title_label.grid(row=1, column=0, pady=7)
 
-        learn_mode_title_label = tk.Label(welcome_frame, text="Learn Mode")
         learn_mode_title_label.grid(row=0, column=0, pady=7)
 
-        learn_mode_description_label = tk.Label(welcome_frame, text="Learn Mode Description")
+        learn_mode_description_label = tk.Label(
+            welcome_frame,
+            text="Learn Mode Description",
+            bg=DRACULA_PANEL_BG,
+            fg=TEXT_SECONDARY,
+            font=BODY_FONT
+        )
         learn_mode_description_label.grid(row=1, column=0, pady=7)
 
         learn_mode_text_box = tk.Text(welcome_frame, width=50, height=7)
@@ -522,14 +611,31 @@ def main():
         )
         back_button.grid(row=0, column=0, sticky="nw", padx=10, pady=10)
 
-
-        learn_session_label = tk.Label(welcome_frame, text="Learn Session")
+        learn_session_label = tk.Label(
+            welcome_frame,
+            text="Learn Session",
+            bg=DRACULA_PANEL_BG,
+            fg=TEXT,
+            font=HEADING_FONT
+        )
         learn_session_label.grid(row=0, column=0, pady=7)
 
-        today_label = tk.Label(welcome_frame, text="Today we'll learn:")
+        today_label = tk.Label(
+            welcome_frame,
+            text="Today we'll learn:",
+            bg=DRACULA_PANEL_BG,
+            fg=TEXT,
+            font=BODY_FONT
+        )
         today_label.grid(row=1, column=0, pady=7)
 
-        topic_label = tk.Label(welcome_frame, text= topic)
+        topic_label = tk.Label(
+            welcome_frame,
+            text=topic,
+            bg=DRACULA_PANEL_BG,
+            fg=PRIMARY,
+            font=SUBHEADING_FONT
+        )
         topic_label.grid(row=2, column=0, pady=7)
 
         message_text = tk.Text(welcome_frame,width=60, height= 15)
@@ -608,20 +714,35 @@ def main():
 
         back_button.grid(row=0, column=0, sticky="nw", padx=10, pady=10)
 
-
-        hint_mode_title_label = tk.Label(welcome_frame, text="Hint Mode")
+        hint_mode_title_label = tk.Label(
+            welcome_frame,
+            text="Hint Mode",
+            bg=DRACULA_PANEL_BG,
+            fg=PRIMARY,
+            font=SUBHEADING_FONT
+        )
         hint_mode_title_label.grid(row=0, column=0, pady=7)
 
-
-        hint_mode_question_label = tk.Label(welcome_frame, text="What are you building?")
+        hint_mode_question_label = tk.Label(
+            welcome_frame,
+            text="What Are You Building? ",
+            bg=DRACULA_PANEL_BG,
+            fg=PRIMARY,
+            font=SUBHEADING_FONT
+        )
         hint_mode_question_label.grid(row=1, column=0, pady=7)
 
 
         hint_mode_first_text_box = tk.Text(welcome_frame, width=50, height=4)
         hint_mode_first_text_box.grid(row=2, column=0, pady=7)
 
-
-        hint_mode_problem_label = tk.Label(welcome_frame, text="Where are you stuck?")
+        hint_mode_problem_label = tk.Label(
+            welcome_frame,
+            text="Paste only the relevant code.",
+            bg=DRACULA_PANEL_BG,
+            fg=PRIMARY,
+            font=SUBHEADING_FONT
+        )
         hint_mode_problem_label.grid(row=3, column=0, pady=(10, 3))
 
 
