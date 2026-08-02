@@ -60,6 +60,8 @@ MENU_FONT = ("Segoe UI", 10)
 
 STATUS_FONT = ("Segoe UI", 10)
 
-AI_HEADER_FONT = ("Segoe UI", 10, "bold")
-AI_BADGE_FONT = ("Segoe UI", 9)
-AI_INPUT_FONT = ("Segoe UI", 11)
+AI_HEADER_FONT = ("Segoe UI Variable", 10, "bold")
+
+AI_BADGE_FONT = ("Segoe UI Variable", 9)
+
+AI_INPUT_FONT = ("Segoe UI Variable", 11)

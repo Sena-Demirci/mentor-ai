@@ -7,26 +7,20 @@ from ui.sizes import *
 from ui.buttons import create_send_button
 
 
+from ui.ai_card import AICard
+
+
 def create_ai_input(parent):
 
-    ai_chat_frame = tk.Frame(
-        parent,
-        width=AI_INPUT_WIDTH,
-        height=AI_INPUT_HEIGHT,
-        bg=DRACULA_AI_INPUT_BG,
-        highlightbackground=BORDER,
-        highlightthickness=1
-    )
-
-    ai_chat_frame.grid_propagate(False)
+    card = AICard(parent)
 
     # ==========================
     # Header
     # ==========================
 
     header_frame = tk.Frame(
-        ai_chat_frame,
-        bg=DRACULA_AI_INPUT_BG
+        card.content,
+        bg=AI_CARD_BG
     )
 
     header_frame.pack(
@@ -62,8 +56,8 @@ def create_ai_input(parent):
     # ==========================
 
     input_text = tk.Text(
-        ai_chat_frame,
-        bg=DRACULA_AI_INPUT_BG,
+        card.content,
+        bg=AI_CARD_BG,
         fg=TEXT,
         font=AI_INPUT_FONT,
         borderwidth=0,
@@ -80,8 +74,8 @@ def create_ai_input(parent):
     input_text.config(height=6)
 
     bottom_frame = tk.Frame(
-        ai_chat_frame,
-        bg=DRACULA_AI_INPUT_BG
+        card.content,
+        bg=AI_CARD_BG
     )
 
     bottom_frame.pack(
@@ -94,4 +88,6 @@ def create_ai_input(parent):
 
     send_button.pack(side="right")
 
-    return ai_chat_frame
+
+
+    return card

@@ -53,4 +53,22 @@ ERROR = "#FF5555"
 INFO = "#8BE9FD"
 LINK = "#8BE9FD"
 
-AI_HEADER = "#A8B3CF"
+# ==========================
+# AI Card
+# ==========================
+
+AI_CARD_BG = "#1F2128"
+
+AI_CARD_HIGHLIGHT = "#FFFFFF"
+
+AI_CARD_GLOW = "#F8F8F2"
+
+AI_CARD_SHADOW = "#111216"
+
+AI_HEADER = "#B7C0D8"
+
+AI_BADGE_BG = "#2A2D38"
+
+AI_BADGE_TEXT = "#D6DAE6"
+
+
