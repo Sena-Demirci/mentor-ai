@@ -63,17 +63,61 @@ def create_ai_input(parent):
 
     assistant_label.pack(side="left")
 
-    model_label = tk.Label(
-        header_frame,
-        text="GPT-4.1 Mini",
-        bg=BORDER,
-        fg=TEXT,
-        font=AI_BADGE_FONT,
-        padx=8,
-        pady=2
+    pro_image = Image.open("assets/ai_card/badges/pro_badge.png")
+
+    new_width = 60
+    ratio = new_width / pro_image.width
+    new_height = int(pro_image.height * ratio)
+
+    pro_image = pro_image.resize(
+        (new_width, new_height),
+        Image.Resampling.LANCZOS
     )
 
-    model_label.pack(side="right")
+    pro_photo = ImageTk.PhotoImage(pro_image)
+
+    card.pro_photo = pro_photo
+
+    pro_label = tk.Label(
+        header_frame,
+        image=pro_photo,
+        bg=AI_CARD_BG,
+        bd=0,
+        highlightthickness=0
+    )
+
+    pro_label.pack(
+        side="right",
+        padx=(0 , 20)
+    )
+
+    gpt_image = Image.open("assets/ai_card/badges/gpt4.png")
+
+    new_width = 85
+    ratio = new_width / gpt_image.width
+    new_height = int(gpt_image.height * ratio)
+
+    gpt_image = gpt_image.resize(
+        (new_width, new_height),
+        Image.Resampling.LANCZOS
+    )
+
+    gpt_photo = ImageTk.PhotoImage(gpt_image)
+
+    card.gpt_photo = gpt_photo
+
+    gpt_label = tk.Label(
+        header_frame,
+        image=gpt_photo,
+        bg=AI_CARD_BG,
+        bd=0,
+        highlightthickness=0
+    )
+
+    gpt_label.pack(
+        side="right",
+        padx=(0, 0.1)
+    )
 
     # ==========================
     # Text Area
