@@ -3,6 +3,7 @@ import tkinter as tk
 from ui.colors import *
 from ui.fonts import *
 from ui.sizes import *
+from PIL import Image, ImageTk
 
 
 
@@ -16,7 +17,9 @@ def create_ai_input(parent):
         parent,
         width=AI_INPUT_WIDTH,
         height=AI_INPUT_HEIGHT,
-        bg=AI_CARD_BG
+        bg=AI_CARD_BG,
+        highlightbackground="#8B5CF6",
+        highlightthickness=1
     )
 
     card.pack_propagate(False)
@@ -35,15 +38,30 @@ def create_ai_input(parent):
         pady=(0, 12)
     )
 
-    ai_label = tk.Label(
-        header_frame,
-        text="AI Assistant",
-        bg=DRACULA_AI_INPUT_BG,
-        fg=PRIMARY,
-        font=AI_HEADER_FONT
+    assistant_image = Image.open("assets/ai_card/titles/assistant_title.png")
+
+    new_width = 120
+    ratio = new_width / assistant_image.width
+    new_height = int(assistant_image.height * ratio)
+
+    assistant_image = assistant_image.resize(
+        (new_width, new_height),
+        Image.Resampling.LANCZOS
     )
 
-    ai_label.pack(side="left")
+    assistant_photo = ImageTk.PhotoImage(assistant_image)
+
+    card.assistant_photo = assistant_photo
+
+    assistant_label = tk.Label(
+        header_frame,
+        image=assistant_photo,
+        bg=AI_CARD_BG,
+        bd=0,
+        highlightthickness=0
+    )
+
+    assistant_label.pack(side="left")
 
     model_label = tk.Label(
         header_frame,
