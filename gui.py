@@ -23,7 +23,7 @@ def main():
 
     navigation_stack = []
 
-    top_frame = tk.Frame(window, bg=DRACULA_WINDOW_BG)
+    top_frame = tk.Frame(window, bg=TOP_FRAME)
     top_frame.pack(fill = "x")
 
     button1 = tk.Button(top_frame, text = "File")
