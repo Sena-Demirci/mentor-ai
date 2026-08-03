@@ -8,10 +8,6 @@ from PIL import Image, ImageTk
 
 
 
-from ui.buttons import create_send_button
-
-
-
 def create_ai_input(parent):
     card = tk.Frame(
         parent,
@@ -40,7 +36,7 @@ def create_ai_input(parent):
 
     assistant_image = Image.open("assets/ai_card/titles/assistant_title.png")
 
-    new_width = 120
+    new_width = 125
     ratio = new_width / assistant_image.width
     new_height = int(assistant_image.height * ratio)
 
@@ -65,7 +61,7 @@ def create_ai_input(parent):
 
     pro_image = Image.open("assets/ai_card/badges/pro_badge.png")
 
-    new_width = 60
+    new_width = 64
     ratio = new_width / pro_image.width
     new_height = int(pro_image.height * ratio)
 
@@ -88,12 +84,12 @@ def create_ai_input(parent):
 
     pro_label.pack(
         side="right",
-        padx=(0 , 20)
+        padx=(0 , 10)
     )
 
     gpt_image = Image.open("assets/ai_card/badges/gpt4.png")
 
-    new_width = 85
+    new_width = 90
     ratio = new_width / gpt_image.width
     new_height = int(gpt_image.height * ratio)
 
@@ -116,7 +112,7 @@ def create_ai_input(parent):
 
     gpt_label.pack(
         side="right",
-        padx=(0, 0.1)
+        padx=(0, 3)
     )
 
     # ==========================
@@ -150,14 +146,37 @@ def create_ai_input(parent):
         pady=(0, 10)
     )
 
+    send_image = Image.open(
+        "assets/ai_card/buttons/send_button.png"
+    )
 
-    send_button = create_send_button(
-        bottom_frame)
+    new_width = 68
+
+    ratio = new_width / send_image.width
+    new_height = int(send_image.height * ratio)
+
+    send_image = send_image.resize(
+        (new_width, new_height),
+        Image.Resampling.LANCZOS
+    )
+
+    send_photo = ImageTk.PhotoImage(send_image)
+
+    card.send_photo = send_photo
+
+    send_button = tk.Label(
+        bottom_frame,
+        image=send_photo,
+        bg=AI_CARD_BG,
+        bd=0,
+        highlightthickness=0,
+        cursor="hand2"
+    )
 
     send_button.pack(
         side="right",
-        ipadx=2,
-        ipady=1
+        padx=(0, 14),
+        pady=(0, 2)
     )
 
 
