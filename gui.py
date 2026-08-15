@@ -3,35 +3,71 @@ from openai_client import OpenAIClient
 from logging import disable
 from tkinter import messagebox
 from tkinter import ttk
+
 from settings_manager import *
 from file_manager import *
 from file_manager import open_file
 from file_manager import save_file
 from file_manager import exit_app
+
 from ui.colors import *
 from ui.fonts import *
 from ui.sizes import *
 from ui.ai_input import create_ai_input
 
+from PIL import Image, ImageTk
+
+from file_menu import (
+    create_file_button,
+    create_settings_button,
+    show_file_menu
+)
+
 
 def main():
+
     window = tk.Tk()
+
     window.title("Mentor AI")
-    window.geometry(f"{WINDOW_WIDTH}x{WINDOW_HEIGHT}")
+
+    window.geometry(
+        f"{WINDOW_WIDTH}x{WINDOW_HEIGHT}"
+    )
 
     settings = load_settings()
 
     navigation_stack = []
 
-    top_frame = tk.Frame(window, bg=TOP_FRAME)
-    top_frame.pack(fill = "x")
+    # ==================================
+    # TOP FRAME
+    # ==================================
 
-    button1 = tk.Button(top_frame, text = "File")
-    button1.pack(side = "left")
+    top_frame = tk.Frame(
+        window,
+        bg="#181825",
+        height=75
+    )
 
+    top_frame.pack(
+        fill="x",
+        side="top"
+    )
 
-    main_frame = tk.Frame(window, bg=DRACULA_WINDOW_BG )
-    main_frame.pack(fill="both", expand=True)
+    top_frame.pack_propagate(False)
+
+    # ==================================
+    # MAIN FRAME
+    # ==================================
+
+    main_frame = tk.Frame(
+        window,
+        bg=DRACULA_WINDOW_BG
+    )
+
+    main_frame.pack(
+        fill="both",
+        expand=True
+    )
 
     left_frame = tk.Frame( main_frame,
         width=LEFT_PANEL_WIDTH,
@@ -67,7 +103,6 @@ def main():
         code_editor.delete("1.0", tk.END)
 
 
-
     def open_file_gui():
         content = open_file()
 
@@ -83,36 +118,6 @@ def main():
         content = code_editor.get("1.0", tk.END)
         save_file(content)
 
-    file_menu = tk.Menu(window, tearoff=0)
-
-    file_menu.add_command(
-        label="New Session",
-        command=new_session_gui
-    )
-
-    file_menu.add_command(
-        label="Open File",
-        command=open_file_gui
-    )
-
-    file_menu.add_command(
-        label="Save",
-        command=save_file_gui
-    )
-
-    file_menu.add_separator()
-
-    file_menu.add_command(
-        label="Exit",
-        command=lambda: exit_app(window)
-    )
-
-
-
-    def show_file_menu(event):
-        file_menu.tk_popup(event.x_root, event.y_root)
-
-    button1.bind("<Button-1>", show_file_menu)
 
 
     content_frame = tk.Frame(right_frame,  bg=DRACULA_PANEL_BG)
@@ -562,16 +567,29 @@ def main():
         built_label = tk.Label(welcome_frame, text="Built with Python & Tkinter")
         built_label.grid(row=14, column=0, pady=7)
 
+    # ==================================
+    # FILE BUTTON
+    # ==================================
 
-    settings_button = tk.Button(
+    file_button = create_file_button(
         top_frame,
-        text="⚙",
-        font=("Arial", 16),
-        command=open_settings,
-        borderwidth=0
+        lambda button: show_file_menu(
+            button,
+            new_session_gui,
+            open_file_gui,
+            save_file_gui,
+            lambda: exit_app(window)
+        )
     )
 
-    settings_button.pack(side="right", padx=15)
+    # ==================================
+    # SETTINGS BUTTON
+    # ==================================
+
+    settings_button = create_settings_button(
+        top_frame,
+        open_settings
+    )
 
 
     def learn_mode():
