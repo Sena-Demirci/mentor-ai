@@ -1,3 +1,5 @@
+import os
+import sys
 import tkinter as tk
 from openai_client import OpenAIClient
 from logging import disable
@@ -17,14 +19,38 @@ from ui.ai_input import create_ai_input
 
 from PIL import Image, ImageTk
 
-from file_menu import (
+from ui.file_menu import (
     create_file_button,
     create_settings_button,
     show_file_menu
 )
 
 
+def _enable_windows_dpi_awareness():
+    """
+    Windows, DPI farkındalığı bildirilmeyen Tkinter pencerelerini
+    kendi ölçekleyip piksel piksel büyütür; sonuç bulanık/pikselli
+    ikonlar ve metinlerdir. Bu fonksiyon uygulamayı DPI-aware yapar,
+    böylece Windows arayüzü kendisi bulanıklaştırmadan native
+    çözünürlükte çizer.
+    """
+    if sys.platform != "win32":
+        return
+
+    try:
+        import ctypes
+        ctypes.windll.shcore.SetProcessDpiAwareness(1)
+    except Exception:
+        try:
+            import ctypes
+            ctypes.windll.user32.SetProcessDPIAware()
+        except Exception:
+            pass
+
+
 def main():
+
+    _enable_windows_dpi_awareness()
 
     window = tk.Tk()
 
@@ -45,7 +71,7 @@ def main():
     top_frame = tk.Frame(
         window,
         bg="#181825",
-        height=75
+        height=60
     )
 
     top_frame.pack(
