@@ -4,7 +4,7 @@ from PIL import Image, ImageTk
 
 
 TOP_FRAME_BG = "#181825"
-BUTTON_HEIGHT = 44          # DPI düzeltmesinden sonra native piksel boyutu
+BUTTON_HEIGHT = 54          # File/Settings butonları — okunaklı olması için büyütüldü
 MENU_TARGET_WIDTH = 300     # dropdown menü genişliği (px) - PNG orijinal boyutuna göre ölçeklenir
 
 # ui/file_menu.py -> proje kökü, ui/ klasörünün bir üstü.
@@ -106,6 +106,7 @@ def show_file_menu(
     file_button,
     new_project,
     open_project,
+    recent_projects,
     save_project,
     exit_project
 ):
@@ -197,6 +198,16 @@ def show_file_menu(
 
     canvas.create_rectangle(
         scaled(75),
+        scaled(240),
+        menu_width - scaled(75),
+        scaled(320),
+        fill="",
+        outline="",
+        tags="recent_projects"
+    )
+
+    canvas.create_rectangle(
+        scaled(75),
         scaled(330),
         menu_width - scaled(75),
         scaled(410),
@@ -231,6 +242,12 @@ def show_file_menu(
         "open_project",
         "<Button-1>",
         lambda event: (close_menu(), open_project())
+    )
+
+    canvas.tag_bind(
+        "recent_projects",
+        "<Button-1>",
+        lambda event: (close_menu(), recent_projects())
     )
 
     canvas.tag_bind(

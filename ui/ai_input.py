@@ -8,7 +8,7 @@ from PIL import Image, ImageTk
 
 
 
-def create_ai_input(parent):
+def create_ai_input(parent, on_send=None):
     card = tk.Frame(
         parent,
         width=AI_INPUT_WIDTH,
@@ -136,6 +136,10 @@ def create_ai_input(parent):
 
     input_text.config(height=6)
 
+    # gui.py, "Start" işlevini bu kutudan okuyabilsin diye card üzerinde
+    # erişilebilir bir referans bırakıyoruz.
+    card.input_text = input_text
+
     bottom_frame = tk.Frame(
         card,
         bg=AI_CARD_BG
@@ -179,7 +183,25 @@ def create_ai_input(parent):
         pady=(0, 2)
     )
 
+    card.send_button = send_button
 
+    def _handle_send(event=None):
+        if on_send is None:
+            return
+        text = input_text.get("1.0", "end").strip()
+        on_send(text)
+
+    send_button.bind("<Button-1>", _handle_send)
+
+    # Metin kutusunda Enter'a basınca da gönderilsin (Shift+Enter yeni satır
+    # bıraksın), tarayıcı sohbet kutularındaki alışılmış davranış budur.
+    def _handle_enter(event):
+        if event.state & 0x0001:  # Shift basılıysa yeni satıra izin ver
+            return
+        _handle_send()
+        return "break"
+
+    input_text.bind("<Return>", _handle_enter)
 
 
 
