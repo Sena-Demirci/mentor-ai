@@ -211,7 +211,8 @@ def main():
     apply_dark_combobox_theme(window)
 
     settings = load_settings()
-
+    ai_client = OpenAIClient()
+    planning_history = []
     navigation_stack = []
 
     # ==================================
@@ -359,8 +360,7 @@ def main():
 
     def plan_mode():
         clear_screen(welcome_frame)
-
-        clear_screen(welcome_frame)
+        planning_history.clear()
 
         back_button = create_back_button(welcome_frame, home_screen)
 
@@ -388,14 +388,30 @@ def main():
         continue_button = styled_button(welcome_frame, "Continue", lambda: continue_mode(text_box))
         continue_button.grid(row=3, column=0, pady = 7)
 
-
-
-
     def conversation_screen(project):
+
         clear_screen(welcome_frame)
 
+        planning_history.clear()
 
-        back_button = create_back_button(welcome_frame, plan_mode)
+        planning_history.append({
+            "role": "user",
+            "content": project
+        })
+
+        first_response = ai_client.get_planning_response(
+            planning_history
+        )
+
+        planning_history.append({
+            "role": "assistant",
+            "content": first_response
+        })
+
+        back_button = create_back_button(
+            welcome_frame,
+            plan_mode
+        )
 
         planning_session_label = tk.Label(
             welcome_frame,
@@ -404,52 +420,166 @@ def main():
             fg=TEXT,
             font=HEADING_FONT
         )
-        planning_session_label.grid(row=0, column=0, pady=7)
+        planning_session_label.pack(pady=(10, 5))
 
         project_idea_label = tk.Label(
             welcome_frame,
             text="Project Idea",
             bg=DRACULA_PANEL_BG,
             fg=TEXT,
-            font=BODY_FONT
+            font=SUBHEADING_FONT
         )
-        project_idea_label.grid(row=1, column=0, pady=7)
+        project_idea_label.pack(pady=(5, 5))
 
-        ai_explanaition_label = tk.Label(
+        project_text_box = themed_textbox(
             welcome_frame,
-            text="Great! Let's understand your project together.",
-            bg=DRACULA_PANEL_BG,
-            fg=TEXT_SECONDARY,
-            font=BODY_FONT
+            width=50,
+            height=5
         )
-        ai_explanaition_label.grid(row=3, column=0, pady=7)
 
-        project_text_box = themed_textbox(welcome_frame, width=50, height=7)
-        project_text_box.grid(row=2, column=0, pady=7)
+        project_text_box.insert(
+            "1.0",
+            project
+        )
 
-        project_text_box.insert("1.0", project)
+        project_text_box.config(
+            state="disabled"
+        )
 
+        project_text_box.pack(
+            pady=(0, 10)
+        )
+
+        ai_explanation_label = tk.Label(
+            welcome_frame,
+            text="Mentor AI",
+            bg=DRACULA_PANEL_BG,
+            fg=TEXT,
+            font=SUBHEADING_FONT
+        )
+        ai_explanation_label.pack(
+            pady=(5, 5)
+        )
+
+        ai_response_box = themed_textbox(
+            welcome_frame,
+            width=50,
+            height=8
+        )
+
+        ai_response_box.insert(
+            "1.0",
+            first_response
+        )
+
+        ai_response_box.config(
+            state="disabled"
+        )
+
+        ai_response_box.pack(
+            pady=(0, 10)
+        )
+
+        response_label = tk.Label(
+            welcome_frame,
+            text="Your Response",
+            bg=DRACULA_PANEL_BG,
+            fg=TEXT,
+            font=SUBHEADING_FONT
+        )
+
+        response_label.pack(
+            pady=(5, 5)
+        )
+
+        user_response_box = themed_textbox(
+            welcome_frame,
+            width=50,
+            height=5
+        )
+
+        user_response_box.pack(
+            pady=(0, 10)
+        )
+
+        def send_planning_message():
+            user_message = user_response_box.get(
+                "1.0",
+                "end"
+            ).strip()
+
+            if not user_message:
+                messagebox.showwarning(
+                    "Empty Input",
+                    "Please enter something first."
+                )
+                return
+
+            planning_history.append({
+                "role": "user",
+                "content": user_message
+            })
+
+            response = ai_client.get_planning_response(
+                planning_history
+            )
+
+            planning_history.append({
+                "role": "assistant",
+                "content": response
+            })
+
+            ai_response_box.config(
+                state="normal"
+            )
+
+            ai_response_box.delete(
+                "1.0",
+                "end"
+            )
+
+            ai_response_box.insert(
+                "1.0",
+                response
+            )
+
+            ai_response_box.config(
+                state="disabled"
+            )
+
+            user_response_box.delete(
+                "1.0",
+                "end"
+            )
 
         continue_button = styled_button(
             welcome_frame,
             "Continue",
-            lambda: next_question(project_text_box)
+            send_planning_message
         )
-        continue_button.grid(row=4, column=0, pady=7)
 
-
-
+        continue_button.pack(
+            pady=(5, 10)
+        )
 
     def next_question(project_text_box):
         project = project_text_box.get("1.0", "end").strip()
         print(project)
 
-
-
     def continue_mode(text_box):
-        print("Continue clicked")
 
-        project = text_box.get("1.0", "end").strip()
+        project = text_box.get(
+            "1.0",
+            "end"
+        ).strip()
+
+        if not project:
+            messagebox.showwarning(
+                "Empty Input",
+                "Please describe what you want to build."
+            )
+            return
+
         conversation_screen(project)
 
 
@@ -493,13 +623,101 @@ def main():
         goal_label.grid(row=3, column=0, pady=(14, 0))
 
         def start_ai(text):
+
             if not text:
                 messagebox.showwarning(
-                    "Missing Information",
-                    "Please describe what you'd like to work on."
+                    "Empty Input",
+                    "Please enter something first."
                 )
                 return
-            conversation_screen(text)
+
+            intent = ai_client.classify_intent(text)
+
+            if intent == "PLANNING":
+                conversation_screen(text)
+            else:
+                direct_answer_screen(text)
+
+        def direct_answer_screen(question):
+
+            clear_screen(welcome_frame)
+
+            back_button = create_back_button(
+                welcome_frame,
+                home_screen
+            )
+
+            title_label = tk.Label(
+                welcome_frame,
+                text="Mentor AI",
+                bg=DRACULA_PANEL_BG,
+                fg=PRIMARY,
+                font=HEADING_FONT
+            )
+
+            title_label.pack(
+                pady=(20, 10)
+            )
+
+            question_label = tk.Label(
+                welcome_frame,
+                text="Your Question",
+                bg=DRACULA_PANEL_BG,
+                fg=TEXT,
+                font=SUBHEADING_FONT
+            )
+
+            question_label.pack(
+                pady=(10, 5)
+            )
+
+            question_box = themed_textbox(
+                welcome_frame,
+                width=60,
+                height=5
+            )
+
+            question_box.insert(
+                "1.0",
+                question
+            )
+
+            question_box.pack(
+                pady=(0, 15)
+            )
+
+            answer = ai_client.get_a_direct_answer(question)
+
+            answer_label = tk.Label(
+                welcome_frame,
+                text="Mentor AI",
+                bg=DRACULA_PANEL_BG,
+                fg=PRIMARY,
+                font=SUBHEADING_FONT
+            )
+
+            answer_label.pack(
+                pady=(10, 5)
+            )
+
+            answer_box = themed_textbox(
+                welcome_frame,
+                width=70,
+                height=12
+            )
+
+            answer_box.insert(
+                "1.0",
+                answer
+            )
+
+            answer_box.config(
+                state="disabled"
+            )
+
+            answer_box.pack(
+                pady=(0, 20)
+            )
 
         ai_input = create_ai_input(welcome_frame, on_send=start_ai)
 

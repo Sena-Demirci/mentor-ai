@@ -8,6 +8,8 @@ from mentor_prompts import FOLLOW_UP_PROMPT
 from mentor_prompts import FOLLOW_UP_HINT_PROMPT
 from mentor_prompts import DEBUG_PROMPT
 from mentor_prompts import FOLLOW_UP_DEBUG_PROMPT
+from mentor_prompts import ROUTER_PROMPT
+from mentor_prompts import PLANNING_PROMPT
 
 
 class OpenAIClient(AIClient):
@@ -189,6 +191,41 @@ class OpenAIClient(AIClient):
 
             )
 
+    def classify_intent(self, message):
+
+        response = self.client.chat.completions.create(
+            model="gpt-4.1-mini",
+            messages=[
+                {
+                    "role": "system",
+                    "content": ROUTER_PROMPT
+                },
+                {
+                    "role": "user",
+                    "content": message
+                }
+            ]
+        )
+
+        return response.choices[0].message.content.strip().upper()
+
+    def get_planning_response(self, history):
+
+        messages = [
+            {
+                "role": "system",
+                "content": PLANNING_PROMPT
+            }
+        ]
+
+        messages.extend(history)
+
+        response = self.client.chat.completions.create(
+            model="gpt-4.1-mini",
+            messages=messages
+        )
+
+        return response.choices[0].message.content.strip()
 
 
 
