@@ -1,6 +1,9 @@
 import os
 import re
 import sys
+import subprocess
+import tempfile
+import threading
 import tkinter as tk
 from openai_client import OpenAIClient
 from logging import disable
@@ -59,16 +62,21 @@ DIVIDER_COLOR = "#3A3560"
 # Dracula paletinden esinlenilmiş renkler. code_editor'ın selectbackground'ı
 # (kullanıcının beğendiği taralı alan rengi) burada değiştirilmiyor.
 SYNTAX_COLORS = {
-    "comment": "#5C6370",
-    "string": "#C3A572",
-    "decorator": "#CE9178",
-    "funcdef": "#7FB77E",
-    "classdef": "#61AFEF",
-    "number": "#9D7CD8",
-    "selfword": "#B98C64",
+    "comment": "#6B7280",
+    "string": "#7FB77E",
+    "decorator": "#D18B4A",
+    "funcdef": "#61AFEF",
+    "classdef": "#56B6C2",
+    "number": "#B58DDB",
+    "selfword": "#E0796E",
     "keyword": "#C2477E",
-    "builtin": "#56B6C2",
+    "builtin": "#9AA5CE",
+    "operator": "#8992A6",
 }
+
+# code_editor'daki normal metin (değişken adı, operatör, noktalama) için
+# saf beyaz yerine kullanılan, gözü daha az yoran ton.
+CODE_EDITOR_FG = "#ABB2BF"
 
 _PYTHON_KEYWORDS = (
     r"False|None|True|and|as|assert|async|await|break|class|continue|"
@@ -93,6 +101,7 @@ _TOKEN_SPECS = [
     ("selfword", r"\b(?:self|cls)\b"),
     ("keyword", rf"\b(?:{_PYTHON_KEYWORDS})\b"),
     ("builtin", rf"\b(?:{_PYTHON_BUILTINS})\b"),
+    ("operator", r"[+\-*/%=<>!&|^~:]+|[.,;\[\]{}()]"),
 ]
 
 _PYTHON_TOKEN_REGEX = re.compile(
@@ -348,6 +357,147 @@ def main():
     # CODE EDITOR + SATIR NUMARALARI
     # ==================================
 
+    # --- Araç çubuğu: Run butonu + hata/durum etiketi ---
+    editor_toolbar = tk.Frame(left_frame, bg="#1E1F2E", height=36)
+    editor_toolbar.pack(side="top", fill="x")
+    editor_toolbar.pack_propagate(False)
+
+    run_button = tk.Button(
+        editor_toolbar,
+        text="▶ Run",
+        bg="#2E7D46",
+        fg="#FFFFFF",
+        activebackground="#379754",
+        activeforeground="#FFFFFF",
+        relief="flat",
+        bd=0,
+        padx=14,
+        pady=3,
+        cursor="hand2",
+        font=("Segoe UI", 9, "bold")
+    )
+    run_button.pack(side="left", padx=10, pady=5)
+    run_button.bind("<Enter>", lambda e: run_button.config(bg="#379754"))
+    run_button.bind("<Leave>", lambda e: run_button.config(bg="#2E7D46"))
+
+    editor_status_label = tk.Label(
+        editor_toolbar,
+        text="",
+        bg="#1E1F2E",
+        fg=TEXT_SECONDARY,
+        font=("Segoe UI", 9)
+    )
+    editor_status_label.pack(side="left", padx=10)
+
+    # --- Terminal paneli (Run çıktısı stdout/stderr burada gösterilir) ---
+    terminal_frame = tk.Frame(left_frame, bg="#12131C", height=170)
+    terminal_frame.pack(side="bottom", fill="x")
+    terminal_frame.pack_propagate(False)
+
+    terminal_header = tk.Label(
+        terminal_frame,
+        text="Terminal",
+        bg="#12131C",
+        fg=TEXT_SECONDARY,
+        font=("Segoe UI", 9, "bold"),
+        anchor="w"
+    )
+    terminal_header.pack(fill="x", padx=10, pady=(6, 2))
+
+    terminal_output = tk.Text(
+        terminal_frame,
+        bg="#12131C",
+        fg=CODE_EDITOR_FG,
+        insertbackground=CODE_EDITOR_FG,
+        font=CODE_FONT,
+        relief="flat",
+        borderwidth=0,
+        highlightthickness=0,
+        wrap="word",
+        state="disabled"
+    )
+    terminal_output.pack(fill="both", expand=True, padx=8, pady=(0, 8))
+
+    terminal_output.tag_configure("stdout_text", foreground=CODE_EDITOR_FG)
+    terminal_output.tag_configure("stderr_text", foreground="#E06C75")
+    terminal_output.tag_configure("info_text", foreground="#61AFEF")
+
+    def write_to_terminal(text, tag="stdout_text"):
+        terminal_output.config(state="normal")
+        terminal_output.insert("end", text, tag)
+        terminal_output.see("end")
+        terminal_output.config(state="disabled")
+
+    def clear_terminal():
+        terminal_output.config(state="normal")
+        terminal_output.delete("1.0", "end")
+        terminal_output.config(state="disabled")
+
+    def run_code():
+        code = code_editor.get("1.0", "end-1c")
+
+        clear_terminal()
+        write_to_terminal("Running...\n", "info_text")
+        run_button.config(state="disabled")
+
+        def worker():
+            tmp_path = None
+            try:
+                with tempfile.NamedTemporaryFile(
+                    mode="w",
+                    suffix=".py",
+                    delete=False,
+                    encoding="utf-8"
+                ) as tmp_file:
+                    tmp_file.write(code)
+                    tmp_path = tmp_file.name
+
+                result = subprocess.run(
+                    [sys.executable, tmp_path],
+                    capture_output=True,
+                    text=True,
+                    timeout=10
+                )
+
+                window.after(
+                    0,
+                    lambda: show_run_result(result.stdout, result.stderr)
+                )
+
+            except subprocess.TimeoutExpired:
+                window.after(
+                    0,
+                    lambda: show_run_result(
+                        "", "Execution timed out (10 second limit).\n"
+                    )
+                )
+            except Exception as exc:
+                window.after(0, lambda: show_run_result("", str(exc) + "\n"))
+            finally:
+                if tmp_path:
+                    try:
+                        os.remove(tmp_path)
+                    except OSError:
+                        pass
+
+        threading.Thread(target=worker, daemon=True).start()
+
+    def show_run_result(stdout_text, stderr_text):
+        clear_terminal()
+
+        if stdout_text:
+            write_to_terminal(stdout_text, "stdout_text")
+
+        if stderr_text:
+            write_to_terminal(stderr_text, "stderr_text")
+
+        if not stdout_text and not stderr_text:
+            write_to_terminal("(no output)\n", "info_text")
+
+        run_button.config(state="normal")
+
+    run_button.config(command=run_code)
+
     editor_container = tk.Frame(left_frame, bg=DRACULA_EDITOR_BG)
     editor_container.pack(fill="both", expand=True)
 
@@ -371,7 +521,7 @@ def main():
         width=EDITOR_WIDTH,
         height=EDITOR_HEIGHT,
         bg=DRACULA_EDITOR_BG,
-        fg=TEXT,
+        fg=CODE_EDITOR_FG,
         font=CODE_FONT,
         insertbackground=EDITOR_CURSOR,
         selectbackground=EDITOR_SELECTION,
@@ -381,6 +531,14 @@ def main():
     code_editor.pack(side="left", fill="both", expand=True)
 
     configure_syntax_tags(code_editor, CODE_FONT)
+
+    # Söz dizimi hatası olan satırı işaretlemek için kullanılan etiket
+    # (hafif kırmızı arkaplan + alt çizgi).
+    code_editor.tag_configure(
+        "error_line",
+        underline=True,
+        background="#3A2328"
+    )
 
     def update_line_numbers(event=None):
         line_count = int(code_editor.index("end-1c").split(".")[0])
@@ -399,9 +557,30 @@ def main():
     def on_code_editor_scroll(*args):
         line_numbers.yview_moveto(code_editor.yview()[0])
 
+    def check_syntax_errors():
+        code_editor.tag_remove("error_line", "1.0", "end")
+
+        code = code_editor.get("1.0", "end-1c")
+
+        if not code.strip():
+            editor_status_label.config(text="", fg=TEXT_SECONDARY)
+            return
+
+        try:
+            compile(code, "<code_editor>", "exec")
+            editor_status_label.config(text="No syntax errors", fg="#7FB77E")
+        except SyntaxError as error:
+            line_no = error.lineno or 1
+            code_editor.tag_add("error_line", f"{line_no}.0", f"{line_no}.end")
+            editor_status_label.config(
+                text=f"Line {line_no}: {error.msg}",
+                fg="#E06C75"
+            )
+
     def on_code_editor_change(event=None):
         update_line_numbers()
         highlight_python_syntax(code_editor)
+        check_syntax_errors()
 
     code_editor.bind("<KeyRelease>", on_code_editor_change)
     code_editor.bind("<MouseWheel>", lambda e: window.after(1, on_code_editor_scroll))
@@ -410,6 +589,7 @@ def main():
 
     update_line_numbers()
     highlight_python_syntax(code_editor)
+    check_syntax_errors()
 
 
 
@@ -417,6 +597,7 @@ def main():
         code_editor.delete("1.0", tk.END)
         highlight_python_syntax(code_editor)
         update_line_numbers()
+        check_syntax_errors()
 
 
     def open_file_gui():
@@ -429,6 +610,7 @@ def main():
         code_editor.insert("1.0", content)
         highlight_python_syntax(code_editor)
         update_line_numbers()
+        check_syntax_errors()
 
 
 
