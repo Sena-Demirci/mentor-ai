@@ -4,7 +4,7 @@ from PIL import Image, ImageTk
 
 
 TOP_FRAME_BG = "#181825"
-BUTTON_HEIGHT = 54          # File/Settings butonları — okunaklı olması için büyütüldü
+BUTTON_HEIGHT = 56          # File/Settings butonları — okunaklı olması için büyütüldü
 MENU_TARGET_WIDTH = 300     # dropdown menü genişliği (px) - PNG orijinal boyutuna göre ölçeklenir
 
 # ui/file_menu.py -> proje kökü, ui/ klasörünün bir üstü.

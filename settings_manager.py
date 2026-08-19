@@ -1,9 +1,7 @@
 import json
 import os
 
-
 SETTINGS_FILE = "settings.json"
-
 
 DEFAULT_SETTINGS = {
     "model": "gpt-4.1-mini",
@@ -19,15 +17,7 @@ def load_settings():
         return DEFAULT_SETTINGS.copy()
 
     with open(SETTINGS_FILE, "r") as file:
-        settings = json.load(file)
-
-    # Uygulamanın mevcut UI'ı Dracula/dark olduğu için
-    # eski "Light" kaydını Dark'a çevir.
-    if settings.get("theme") == "Light":
-        settings["theme"] = "Dark"
-        save_settings(settings)
-
-    return settings
+        return json.load(file)
 
 
 def save_settings(settings):

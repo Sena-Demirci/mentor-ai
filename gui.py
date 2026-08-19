@@ -1,4 +1,5 @@
 import os
+import re
 import sys
 import tkinter as tk
 from openai_client import OpenAIClient
@@ -50,6 +51,79 @@ BACK_BUTTON_BG = "#221E33"
 BACK_BUTTON_HOVER_BG = "#332B4D"
 
 DIVIDER_COLOR = "#3A3560"
+
+
+# ==================================
+# PYTHON SÖZ DİZİMİ RENKLENDİRME (SYNTAX HIGHLIGHTING)
+# ==================================
+# Dracula paletinden esinlenilmiş renkler. code_editor'ın selectbackground'ı
+# (kullanıcının beğendiği taralı alan rengi) burada değiştirilmiyor.
+SYNTAX_COLORS = {
+    "comment": "#5C6370",
+    "string": "#C3A572",
+    "decorator": "#CE9178",
+    "funcdef": "#7FB77E",
+    "classdef": "#61AFEF",
+    "number": "#9D7CD8",
+    "selfword": "#B98C64",
+    "keyword": "#C2477E",
+    "builtin": "#56B6C2",
+}
+
+_PYTHON_KEYWORDS = (
+    r"False|None|True|and|as|assert|async|await|break|class|continue|"
+    r"def|del|elif|else|except|finally|for|from|global|if|import|in|"
+    r"is|lambda|nonlocal|not|or|pass|raise|return|try|while|with|yield"
+)
+
+_PYTHON_BUILTINS = (
+    r"print|len|range|str|int|float|list|dict|set|tuple|bool|open|type|"
+    r"isinstance|super|input|enumerate|zip|map|filter|sorted|sum|min|max|"
+    r"abs|round|object|Exception|ValueError|TypeError|KeyError|IndexError|"
+    r"AttributeError|StopIteration|repr|hasattr|getattr|setattr"
+)
+
+_TOKEN_SPECS = [
+    ("comment", r"#[^\n]*"),
+    ("string", r"'''.*?'''|\"\"\".*?\"\"\"|'(?:[^'\\\n]|\\.)*'|\"(?:[^\"\\\n]|\\.)*\""),
+    ("decorator", r"@\w+"),
+    ("funcdef", r"(?<=\bdef )\w+"),
+    ("classdef", r"(?<=\bclass )\w+"),
+    ("number", r"\b\d+\.?\d*\b"),
+    ("selfword", r"\b(?:self|cls)\b"),
+    ("keyword", rf"\b(?:{_PYTHON_KEYWORDS})\b"),
+    ("builtin", rf"\b(?:{_PYTHON_BUILTINS})\b"),
+]
+
+_PYTHON_TOKEN_REGEX = re.compile(
+    "|".join(f"(?P<{name}>{pattern})" for name, pattern in _TOKEN_SPECS),
+    re.DOTALL
+)
+
+
+def configure_syntax_tags(text_widget, base_font):
+    for tag, color in SYNTAX_COLORS.items():
+        bold_tags = ("keyword", "funcdef", "classdef", "decorator")
+        if tag in bold_tags:
+            text_widget.tag_configure(
+                tag, foreground=color,
+                font=(base_font[0], base_font[1], "bold")
+            )
+        else:
+            text_widget.tag_configure(tag, foreground=color)
+
+
+def highlight_python_syntax(text_widget):
+    for tag in SYNTAX_COLORS:
+        text_widget.tag_remove(tag, "1.0", "end")
+
+    content = text_widget.get("1.0", "end-1c")
+
+    for match in _PYTHON_TOKEN_REGEX.finditer(content):
+        tag = match.lastgroup
+        start_index = f"1.0+{match.start()}c"
+        end_index = f"1.0+{match.end()}c"
+        text_widget.tag_add(tag, start_index, end_index)
 
 
 def themed_textbox(parent, **kwargs):
@@ -211,6 +285,11 @@ def main():
     apply_dark_combobox_theme(window)
 
     settings = load_settings()
+
+    # Eski settings.json dosyalarında kalmış olabilecek "Light" gibi artık
+    # var olmayan bir tema değerini sessizce "Dark"a çeviriyoruz.
+    if settings.get("theme") not in ("Dark", "System (Coming Soon)"):
+        settings["theme"] = "Dark"
     ai_client = OpenAIClient()
     planning_history = []
     navigation_stack = []
@@ -222,7 +301,7 @@ def main():
     top_frame = tk.Frame(
         window,
         bg="#181825",
-        height=78
+        height=64
     )
 
     top_frame.pack(
@@ -301,6 +380,8 @@ def main():
     )
     code_editor.pack(side="left", fill="both", expand=True)
 
+    configure_syntax_tags(code_editor, CODE_FONT)
+
     def update_line_numbers(event=None):
         line_count = int(code_editor.index("end-1c").split(".")[0])
 
@@ -318,17 +399,24 @@ def main():
     def on_code_editor_scroll(*args):
         line_numbers.yview_moveto(code_editor.yview()[0])
 
-    code_editor.bind("<KeyRelease>", update_line_numbers)
+    def on_code_editor_change(event=None):
+        update_line_numbers()
+        highlight_python_syntax(code_editor)
+
+    code_editor.bind("<KeyRelease>", on_code_editor_change)
     code_editor.bind("<MouseWheel>", lambda e: window.after(1, on_code_editor_scroll))
     code_editor.bind("<ButtonRelease>", lambda e: window.after(1, update_line_numbers))
-    code_editor.bind("<Configure>", update_line_numbers)
+    code_editor.bind("<Configure>", on_code_editor_change)
 
     update_line_numbers()
+    highlight_python_syntax(code_editor)
 
 
 
     def new_session_gui():
         code_editor.delete("1.0", tk.END)
+        highlight_python_syntax(code_editor)
+        update_line_numbers()
 
 
     def open_file_gui():
@@ -339,6 +427,8 @@ def main():
 
         code_editor.delete("1.0", tk.END)
         code_editor.insert("1.0", content)
+        highlight_python_syntax(code_editor)
+        update_line_numbers()
 
 
 
@@ -392,6 +482,14 @@ def main():
 
         clear_screen(welcome_frame)
 
+        # Geri butonu ve AI çağrısı SIRALAMASI önemli: AI çağrısı hata
+        # verirse (kota/ağ vb.) bile kullanıcının geri dönebileceği bir
+        # buton her zaman ekranda olsun diye bunu en başta oluşturuyoruz.
+        back_button = create_back_button(
+            welcome_frame,
+            plan_mode
+        )
+
         planning_history.clear()
 
         planning_history.append({
@@ -399,19 +497,23 @@ def main():
             "content": project
         })
 
-        first_response = ai_client.get_planning_response(
-            planning_history
-        )
+        try:
+            first_response = ai_client.get_planning_response(
+                planning_history
+            )
+        except Exception:
+            first_response = (
+                "I couldn't reach the AI right now.\n\n"
+                "This usually means the OpenAI API key has no available "
+                "quota/credits, or there is no internet connection.\n"
+                "Please check your OpenAI account billing or your "
+                "connection, then try again."
+            )
 
         planning_history.append({
             "role": "assistant",
             "content": first_response
         })
-
-        back_button = create_back_button(
-            welcome_frame,
-            plan_mode
-        )
 
         planning_session_label = tk.Label(
             welcome_frame,
@@ -420,7 +522,7 @@ def main():
             fg=TEXT,
             font=HEADING_FONT
         )
-        planning_session_label.pack(pady=(10, 5))
+        planning_session_label.grid(row=1, column=0, pady=(10, 5))
 
         project_idea_label = tk.Label(
             welcome_frame,
@@ -429,7 +531,7 @@ def main():
             fg=TEXT,
             font=SUBHEADING_FONT
         )
-        project_idea_label.pack(pady=(5, 5))
+        project_idea_label.grid(row=2, column=0, pady=(5, 5))
 
         project_text_box = themed_textbox(
             welcome_frame,
@@ -446,9 +548,7 @@ def main():
             state="disabled"
         )
 
-        project_text_box.pack(
-            pady=(0, 10)
-        )
+        project_text_box.grid(row=3, column=0, pady=(0, 10))
 
         ai_explanation_label = tk.Label(
             welcome_frame,
@@ -457,9 +557,7 @@ def main():
             fg=TEXT,
             font=SUBHEADING_FONT
         )
-        ai_explanation_label.pack(
-            pady=(5, 5)
-        )
+        ai_explanation_label.grid(row=4, column=0, pady=(5, 5))
 
         ai_response_box = themed_textbox(
             welcome_frame,
@@ -476,9 +574,7 @@ def main():
             state="disabled"
         )
 
-        ai_response_box.pack(
-            pady=(0, 10)
-        )
+        ai_response_box.grid(row=5, column=0, pady=(0, 10))
 
         response_label = tk.Label(
             welcome_frame,
@@ -488,9 +584,7 @@ def main():
             font=SUBHEADING_FONT
         )
 
-        response_label.pack(
-            pady=(5, 5)
-        )
+        response_label.grid(row=6, column=0, pady=(5, 5))
 
         user_response_box = themed_textbox(
             welcome_frame,
@@ -498,9 +592,7 @@ def main():
             height=5
         )
 
-        user_response_box.pack(
-            pady=(0, 10)
-        )
+        user_response_box.grid(row=7, column=0, pady=(0, 10))
 
         def send_planning_message():
             user_message = user_response_box.get(
@@ -520,9 +612,17 @@ def main():
                 "content": user_message
             })
 
-            response = ai_client.get_planning_response(
-                planning_history
-            )
+            try:
+                response = ai_client.get_planning_response(
+                    planning_history
+                )
+            except Exception:
+                response = (
+                    "I couldn't reach the AI right now.\n\n"
+                    "This usually means the OpenAI API key has no "
+                    "available quota/credits, or there is no internet "
+                    "connection. Please check and try again."
+                )
 
             planning_history.append({
                 "role": "assistant",
@@ -558,13 +658,7 @@ def main():
             send_planning_message
         )
 
-        continue_button.pack(
-            pady=(5, 10)
-        )
-
-    def next_question(project_text_box):
-        project = project_text_box.get("1.0", "end").strip()
-        print(project)
+        continue_button.grid(row=8, column=0, pady=(5, 10))
 
     def continue_mode(text_box):
 
@@ -631,7 +725,17 @@ def main():
                 )
                 return
 
-            intent = ai_client.classify_intent(text)
+            try:
+                intent = ai_client.classify_intent(text)
+            except Exception:
+                messagebox.showerror(
+                    "Connection Error",
+                    "I couldn't reach the AI right now.\n\n"
+                    "This usually means the OpenAI API key has no "
+                    "available quota/credits, or there is no internet "
+                    "connection. Please check and try again."
+                )
+                return
 
             if intent == "PLANNING":
                 conversation_screen(text)
@@ -655,9 +759,7 @@ def main():
                 font=HEADING_FONT
             )
 
-            title_label.pack(
-                pady=(20, 10)
-            )
+            title_label.grid(row=1, column=0, pady=(20, 10))
 
             question_label = tk.Label(
                 welcome_frame,
@@ -667,9 +769,7 @@ def main():
                 font=SUBHEADING_FONT
             )
 
-            question_label.pack(
-                pady=(10, 5)
-            )
+            question_label.grid(row=2, column=0, pady=(10, 5))
 
             question_box = themed_textbox(
                 welcome_frame,
@@ -682,11 +782,17 @@ def main():
                 question
             )
 
-            question_box.pack(
-                pady=(0, 15)
-            )
+            question_box.grid(row=3, column=0, pady=(0, 15))
 
-            answer = ai_client.get_a_direct_answer(question)
+            try:
+                answer = ai_client.get_a_direct_answer(question)
+            except Exception:
+                answer = (
+                    "I couldn't reach the AI right now.\n\n"
+                    "This usually means the OpenAI API key has no "
+                    "available quota/credits, or there is no internet "
+                    "connection. Please check and try again."
+                )
 
             answer_label = tk.Label(
                 welcome_frame,
@@ -696,9 +802,7 @@ def main():
                 font=SUBHEADING_FONT
             )
 
-            answer_label.pack(
-                pady=(10, 5)
-            )
+            answer_label.grid(row=4, column=0, pady=(10, 5))
 
             answer_box = themed_textbox(
                 welcome_frame,
@@ -715,9 +819,7 @@ def main():
                 state="disabled"
             )
 
-            answer_box.pack(
-                pady=(0, 20)
-            )
+            answer_box.grid(row=5, column=0, pady=(0, 20))
 
         ai_input = create_ai_input(welcome_frame, on_send=start_ai)
 
@@ -829,7 +931,6 @@ def main():
         theme_combobox = ttk.Combobox(
             welcome_frame,
             values=[
-                "Light",
                 "Dark",
                 "System (Coming Soon)"
             ],
@@ -1198,7 +1299,10 @@ def main():
 
         hint_mode_code_label = tk.Label(
             welcome_frame,
-            text="Paste only the relevant code."
+            text="Paste only the relevant code.",
+            bg=DRACULA_PANEL_BG,
+            fg=PRIMARY,
+            font=SUBHEADING_FONT
         )
         hint_mode_code_label.grid(row=5, column=0, pady=(5, 3))
 
