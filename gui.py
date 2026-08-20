@@ -36,15 +36,14 @@ from ui.icon_button import create_icon_button
 # ==================================
 # "AI ASSISTANT" KUTUSU TEMASI
 # ==================================
-# Başlangıç ekranındaki mor çerçeveli, koyu renkli AI Assistant kutusuyla
-# aynı görünümü tüm beyaz metin kutularına (Text) uygulamak için kullanılır.
+
+
 AI_BOX_BG = "#14121F"
 AI_BOX_BORDER = "#8B5CF6"
 AI_BOX_FG = "#EDEBF7"
 AI_BOX_PLACEHOLDER_FG = "#8A8698"
 
-# Mod butonlarının (gradyan PNG) ortalama tonuna yakın, düz butonlar için
-# kullanılan tema renkleri - "Continue", "Debug", "Get Hint" vb.
+
 BUTTON_BG = "#3B3A78"
 BUTTON_HOVER_BG = "#4C4A96"
 BUTTON_FG = "#FFFFFF"
@@ -53,14 +52,14 @@ BUTTON_FG = "#FFFFFF"
 BACK_BUTTON_BG = "#221E33"
 BACK_BUTTON_HOVER_BG = "#332B4D"
 
+
 DIVIDER_COLOR = "#3A3560"
 
 
 # ==================================
 # PYTHON SÖZ DİZİMİ RENKLENDİRME (SYNTAX HIGHLIGHTING)
 # ==================================
-# Dracula paletinden esinlenilmiş renkler. code_editor'ın selectbackground'ı
-# (kullanıcının beğendiği taralı alan rengi) burada değiştirilmiyor.
+
 SYNTAX_COLORS = {
     "comment": "#6B7280",
     "string": "#7FB77E",
@@ -74,9 +73,11 @@ SYNTAX_COLORS = {
     "operator": "#8992A6",
 }
 
+
 # code_editor'daki normal metin (değişken adı, operatör, noktalama) için
 # saf beyaz yerine kullanılan, gözü daha az yoran ton.
 CODE_EDITOR_FG = "#ABB2BF"
+
 
 _PYTHON_KEYWORDS = (
     r"False|None|True|and|as|assert|async|await|break|class|continue|"
@@ -84,12 +85,14 @@ _PYTHON_KEYWORDS = (
     r"is|lambda|nonlocal|not|or|pass|raise|return|try|while|with|yield"
 )
 
+
 _PYTHON_BUILTINS = (
     r"print|len|range|str|int|float|list|dict|set|tuple|bool|open|type|"
     r"isinstance|super|input|enumerate|zip|map|filter|sorted|sum|min|max|"
     r"abs|round|object|Exception|ValueError|TypeError|KeyError|IndexError|"
     r"AttributeError|StopIteration|repr|hasattr|getattr|setattr"
 )
+
 
 _TOKEN_SPECS = [
     ("comment", r"#[^\n]*"),
@@ -103,6 +106,8 @@ _TOKEN_SPECS = [
     ("builtin", rf"\b(?:{_PYTHON_BUILTINS})\b"),
     ("operator", r"[+\-*/%=<>!&|^~:]+|[.,;\[\]{}()]"),
 ]
+
+
 
 _PYTHON_TOKEN_REGEX = re.compile(
     "|".join(f"(?P<{name}>{pattern})" for name, pattern in _TOKEN_SPECS),
@@ -122,6 +127,7 @@ def configure_syntax_tags(text_widget, base_font):
             text_widget.tag_configure(tag, foreground=color)
 
 
+
 def highlight_python_syntax(text_widget):
     for tag in SYNTAX_COLORS:
         text_widget.tag_remove(tag, "1.0", "end")
@@ -133,6 +139,7 @@ def highlight_python_syntax(text_widget):
         start_index = f"1.0+{match.start()}c"
         end_index = f"1.0+{match.end()}c"
         text_widget.tag_add(tag, start_index, end_index)
+
 
 
 def themed_textbox(parent, **kwargs):
@@ -155,6 +162,7 @@ def themed_textbox(parent, **kwargs):
     )
     defaults.update(kwargs)
     return tk.Text(parent, **defaults)
+
 
 
 def styled_button(parent, text, command, **kwargs):
@@ -184,6 +192,7 @@ def styled_button(parent, text, command, **kwargs):
     button.bind("<Leave>", lambda e: button.config(bg=BUTTON_BG))
 
     return button
+
 
 
 def create_back_button(parent, command):
@@ -217,10 +226,11 @@ def create_back_button(parent, command):
     return button
 
 
+
 def apply_dark_combobox_theme(window):
     """
     ttk.Combobox varsayılan olarak beyaz/açık temalıdır. Uygulamanın
-    geri kalanıyla aynı koyu + mor tema burada uygulanır.
+    geri kalanıyla aynı koyu + mor tema burada uygulanır..
     """
     style = ttk.Style(window)
     # "clam" cross-platform, saf Tk temasıdır ve ttk.Style renk ayarlarını
@@ -257,13 +267,14 @@ def apply_dark_combobox_theme(window):
     window.option_add("*TCombobox*Listbox.selectForeground", AI_BOX_FG)
 
 
+
 def _enable_windows_dpi_awareness():
     """
     Windows, DPI farkındalığı bildirilmeyen Tkinter pencerelerini
     kendi ölçekleyip piksel piksel büyütür; sonuç bulanık/pikselli
     ikonlar ve metinlerdir. Bu fonksiyon uygulamayı DPI-aware yapar,
     böylece Windows arayüzü kendisi bulanıklaştırmadan native
-    çözünürlükte çizer.
+    çözünürlükte çizer..
     """
     if sys.platform != "win32":
         return
@@ -277,6 +288,7 @@ def _enable_windows_dpi_awareness():
             ctypes.windll.user32.SetProcessDPIAware()
         except Exception:
             pass
+
 
 
 def main():
@@ -295,13 +307,13 @@ def main():
 
     settings = load_settings()
 
-    # Eski settings.json dosyalarında kalmış olabilecek "Light" gibi artık
-    # var olmayan bir tema değerini sessizce "Dark"a çeviriyoruz.
+
     if settings.get("theme") not in ("Dark", "System (Coming Soon)"):
         settings["theme"] = "Dark"
     ai_client = OpenAIClient()
     planning_history = []
     navigation_stack = []
+
 
     # ==================================
     # TOP FRAME
@@ -319,6 +331,7 @@ def main():
     )
 
     top_frame.pack_propagate(False)
+
 
     # ==================================
     # MAIN FRAME
@@ -352,6 +365,7 @@ def main():
         bg= DRACULA_PANEL_BG )
 
     right_frame.pack(side="right",fill="both" ,expand =True)
+
 
     # ==================================
     # CODE EDITOR + SATIR NUMARALARI
@@ -389,7 +403,7 @@ def main():
     )
     editor_status_label.pack(side="left", padx=10)
 
-    # --- Terminal paneli (Run çıktısı stdout/stderr burada gösterilir) ---
+    # -Terminal paneli (Run çıktısı stdout/stderr burada gösterilir) --
     terminal_frame = tk.Frame(left_frame, bg="#12131C", height=170)
     terminal_frame.pack(side="bottom", fill="x")
     terminal_frame.pack_propagate(False)
@@ -422,16 +436,19 @@ def main():
     terminal_output.tag_configure("stderr_text", foreground="#E06C75")
     terminal_output.tag_configure("info_text", foreground="#61AFEF")
 
+
     def write_to_terminal(text, tag="stdout_text"):
         terminal_output.config(state="normal")
         terminal_output.insert("end", text, tag)
         terminal_output.see("end")
         terminal_output.config(state="disabled")
 
+
     def clear_terminal():
         terminal_output.config(state="normal")
         terminal_output.delete("1.0", "end")
         terminal_output.config(state="disabled")
+
 
     def run_code():
         code = code_editor.get("1.0", "end-1c")
@@ -439,6 +456,7 @@ def main():
         clear_terminal()
         write_to_terminal("Running...\n", "info_text")
         run_button.config(state="disabled")
+
 
         def worker():
             tmp_path = None
@@ -482,6 +500,7 @@ def main():
 
         threading.Thread(target=worker, daemon=True).start()
 
+
     def show_run_result(stdout_text, stderr_text):
         clear_terminal()
 
@@ -498,8 +517,10 @@ def main():
 
     run_button.config(command=run_code)
 
+
     editor_container = tk.Frame(left_frame, bg=DRACULA_EDITOR_BG)
     editor_container.pack(fill="both", expand=True)
+
 
     line_numbers = tk.Text(
         editor_container,
@@ -516,6 +537,7 @@ def main():
     )
     line_numbers.pack(side="left", fill="y")
 
+
     code_editor = tk.Text(
         editor_container,
         width=EDITOR_WIDTH,
@@ -530,7 +552,9 @@ def main():
     )
     code_editor.pack(side="left", fill="both", expand=True)
 
+
     configure_syntax_tags(code_editor, CODE_FONT)
+
 
     # Söz dizimi hatası olan satırı işaretlemek için kullanılan etiket
     # (hafif kırmızı arkaplan + alt çizgi).
@@ -539,6 +563,7 @@ def main():
         underline=True,
         background="#3A2328"
     )
+
 
     def update_line_numbers(event=None):
         line_count = int(code_editor.index("end-1c").split(".")[0])
@@ -551,11 +576,14 @@ def main():
         )
         line_numbers.config(state="disabled")
 
+
         # Kod editörüyle aynı kaydırma konumunda kalsın
         line_numbers.yview_moveto(code_editor.yview()[0])
 
+
     def on_code_editor_scroll(*args):
         line_numbers.yview_moveto(code_editor.yview()[0])
+
 
     def check_syntax_errors():
         code_editor.tag_remove("error_line", "1.0", "end")
@@ -576,6 +604,7 @@ def main():
                 text=f"Line {line_no}: {error.msg}",
                 fg="#E06C75"
             )
+
 
     def on_code_editor_change(event=None):
         update_line_numbers()
@@ -659,6 +688,8 @@ def main():
 
         continue_button = styled_button(welcome_frame, "Continue", lambda: continue_mode(text_box))
         continue_button.grid(row=3, column=0, pady = 7)
+
+
 
     def conversation_screen(project):
 
@@ -776,6 +807,8 @@ def main():
 
         user_response_box.grid(row=7, column=0, pady=(0, 10))
 
+
+
         def send_planning_message():
             user_message = user_response_box.get(
                 "1.0",
@@ -842,6 +875,8 @@ def main():
 
         continue_button.grid(row=8, column=0, pady=(5, 10))
 
+
+
     def continue_mode(text_box):
 
         project = text_box.get(
@@ -863,6 +898,7 @@ def main():
     def clear_screen(frame):
         for widget in frame.winfo_children():
             widget.destroy()
+
 
 
     def home_screen():
@@ -898,6 +934,7 @@ def main():
         )
         goal_label.grid(row=3, column=0, pady=(14, 0))
 
+
         def start_ai(text):
 
             if not text:
@@ -923,6 +960,7 @@ def main():
                 conversation_screen(text)
             else:
                 direct_answer_screen(text)
+
 
         def direct_answer_screen(question):
 
@@ -1169,6 +1207,7 @@ def main():
         font_combobox.set(settings["font_size"])
 
 
+
         def save_gui_settings():
             settings["model"] = model_combobox.get()
             settings["theme"] = theme_combobox.get()
@@ -1181,6 +1220,7 @@ def main():
                 "Settings saved successfully."
             )
 
+
         save_button = styled_button(
             welcome_frame,
             "Save Settings",
@@ -1191,6 +1231,8 @@ def main():
             column=0,
             pady=20
         )
+
+
 
         def reset_gui_settings():
 
@@ -1208,6 +1250,7 @@ def main():
                 "Settings restored to default."
             )
 
+
         reset_button = styled_button(
             welcome_frame,
             "Reset",
@@ -1215,6 +1258,7 @@ def main():
         )
 
         reset_button.grid(row=8, column=0, pady=5)
+
 
         about_title = tk.Label(
             welcome_frame,
@@ -1226,30 +1270,36 @@ def main():
 
         about_title.grid(row=9, column=0, pady=12)
 
+
         mentor_ai_title_label = tk.Label(
             welcome_frame, text="Mentor AI", bg=DRACULA_PANEL_BG, fg=TEXT
         )
         mentor_ai_title_label.grid(row=10, column=0, pady= 10)
+
 
         version1_label = tk.Label(
             welcome_frame, text="Version 1.0", bg=DRACULA_PANEL_BG, fg=TEXT_SECONDARY
         )
         version1_label.grid(row=11, column=0, pady=10)
 
+
         developer_label = tk.Label(
             welcome_frame, text="Developer", bg=DRACULA_PANEL_BG, fg=TEXT_SECONDARY
         )
         developer_label.grid(row=12, column=0, pady=7)
+
 
         founder_of_mentor_ai_label = tk.Label(
             welcome_frame, text="Sena DEMİRCİ", bg=DRACULA_PANEL_BG, fg=TEXT
         )
         founder_of_mentor_ai_label.grid(row=13, column=0, pady=7)
 
+
         built_label = tk.Label(
             welcome_frame, text="Built with Python & Tkinter", bg=DRACULA_PANEL_BG, fg=TEXT_SECONDARY
         )
         built_label.grid(row=14, column=0, pady=7)
+
 
     # ==================================
     # FILE BUTTON
@@ -1260,6 +1310,7 @@ def main():
             "Recent Projects",
             "This feature is coming soon."
         )
+
 
     file_button = create_file_button(
         top_frame,
@@ -1283,12 +1334,14 @@ def main():
     )
 
 
+
     def learn_mode():
         global learn_mode_text_box
 
         clear_screen(welcome_frame)
 
         back_button = create_back_button(welcome_frame, home_screen)
+
 
         learn_mode_title_label = tk.Label(
             welcome_frame,
@@ -1300,6 +1353,7 @@ def main():
 
         learn_mode_title_label.grid(row=0, column=0, pady=7)
 
+
         learn_mode_description_label = tk.Label(
             welcome_frame,
             text="Learn Mode Description",
@@ -1309,8 +1363,10 @@ def main():
         )
         learn_mode_description_label.grid(row=1, column=0, pady=7)
 
+
         learn_mode_text_box = themed_textbox(welcome_frame, width=50, height=7)
         learn_mode_text_box.grid(row=2, column=0, pady=7)
+
 
         learn_mode_button = styled_button(
             welcome_frame,
@@ -1318,6 +1374,8 @@ def main():
             start_learning
         )
         learn_mode_button.grid(row=3, column=0, pady=7)
+
+
 
     def start_learning():
         global follow_up_text
@@ -1333,6 +1391,7 @@ def main():
 
         back_button = create_back_button(welcome_frame, learn_mode)
 
+
         learn_session_label = tk.Label(
             welcome_frame,
             text="Learn Session",
@@ -1341,6 +1400,7 @@ def main():
             font=HEADING_FONT
         )
         learn_session_label.grid(row=0, column=0, pady=7)
+
 
         today_label = tk.Label(
             welcome_frame,
@@ -1351,31 +1411,38 @@ def main():
         )
         today_label.grid(row=1, column=0, pady=7)
 
+
         topic_label = tk.Label(
             welcome_frame,
             text=topic,
             bg=DRACULA_PANEL_BG,
             fg=PRIMARY,
             font=SUBHEADING_FONT
+
         )
         topic_label.grid(row=2, column=0, pady=7)
+
 
         message_text = themed_textbox(welcome_frame, width=60, height=15)
         message_text.grid(row=3, column=0, pady=7)
         message_text.insert("1.0", ai_response)
         message_text.config(state = "disabled")
 
+
         scrollbar = tk.Scrollbar(welcome_frame)
         scrollbar.grid(row=3, column=1, sticky="ns")
         scrollbar.config(command=message_text.yview)
         message_text.config(yscrollcommand=scrollbar.set)
 
+
         input_frame = tk.Frame(welcome_frame, bg=DRACULA_PANEL_BG)
         input_frame.grid(row=4, column=0, pady=20, sticky = "ew")
         input_frame.columnconfigure(0, weight=1)
 
+
         follow_up_text = themed_textbox(input_frame, width=50, height=3)
         follow_up_text.grid(row=0, column=0,sticky="ew")
+
 
         send_button = create_icon_button(
             input_frame,
@@ -1384,6 +1451,7 @@ def main():
             size=40
         )
         send_button.grid(row=0, column=1, padx=5)
+
 
     def ask_follow_up():
         question = follow_up_text.get("1.0", "end").strip()
@@ -1407,11 +1475,13 @@ def main():
         follow_up_text.delete("1.0", "end")
 
 
+
     def generate_explanation(topic):
         from openai_client import OpenAIClient
 
         client = OpenAIClient()
         return client.get_learning_explanation(topic)
+
 
     def generate_follow_up(topic, explanation, question):
         from openai_client import OpenAIClient
@@ -1424,6 +1494,7 @@ def main():
             question
         )
 
+
     def open_hint_mode():
         global hint_mode_first_text_box
         global hint_mode_second_text_box
@@ -1435,6 +1506,7 @@ def main():
 
         back_button = create_back_button(welcome_frame, home_screen)
 
+
         hint_mode_title_label = tk.Label(
             welcome_frame,
             text="Hint Mode",
@@ -1443,6 +1515,7 @@ def main():
             font=SUBHEADING_FONT
         )
         hint_mode_title_label.grid(row=0, column=0, pady=7)
+
 
         hint_mode_question_label = tk.Label(
             welcome_frame,
@@ -1457,6 +1530,7 @@ def main():
         hint_mode_first_text_box = themed_textbox(welcome_frame, width=50, height=4)
         hint_mode_first_text_box.grid(row=2, column=0, pady=7)
 
+
         hint_mode_problem_label = tk.Label(
             welcome_frame,
             text="Paste only the relevant code.",
@@ -1465,6 +1539,7 @@ def main():
             font=SUBHEADING_FONT
         )
         hint_mode_problem_label.grid(row=3, column=0, pady=(10, 3))
+
 
 
         hint_mode_second_text_box = themed_textbox(welcome_frame, width=50, height=4)
@@ -1476,8 +1551,10 @@ def main():
             "Example:\nI don't know why my loop never stops."
         )
 
+
         hint_mode_second_text_box.config(fg=AI_BOX_PLACEHOLDER_FG)
         hint_mode_second_text_box.bind("<FocusIn>", clear_placeholder)
+
 
         hint_mode_code_label = tk.Label(
             welcome_frame,
@@ -1488,6 +1565,7 @@ def main():
         )
         hint_mode_code_label.grid(row=5, column=0, pady=(5, 3))
 
+
         hint_mode_third_text_box = themed_textbox(welcome_frame, width=50, height=6)
         hint_mode_third_text_box.grid(row=6, column=0, pady=(0, 10))
 
@@ -1496,8 +1574,10 @@ def main():
             "Only include the code related to your problem."
         )
 
+
         hint_mode_third_text_box.config(fg=AI_BOX_PLACEHOLDER_FG)
         hint_mode_third_text_box.bind("<FocusIn>", clear_placeholder)
+
 
         hint_mode_button = styled_button(
             welcome_frame,
@@ -1507,10 +1587,13 @@ def main():
 
         hint_mode_button.grid(row=7, column=0, pady=10)
 
+
     def clear_placeholder(event):
+
         text_box = event.widget
 
         current_text = text_box.get("1.0", "end-1c")
+
 
         if current_text == "Example:\nI don't know why my loop never stops.":
             text_box.delete("1.0", "end")
@@ -1528,8 +1611,10 @@ def main():
             text_box.delete("1.0", "end")
             text_box.config(fg=AI_BOX_FG)
 
+
     def restore_placeholder(event):
         text_box = event.widget
+
 
         if text_box.get("1.0", "end-1c").strip() == "":
             text_box.config(fg=AI_BOX_PLACEHOLDER_FG)
@@ -1543,12 +1628,14 @@ def main():
         problem = hint_mode_second_text_box.get("1.0", "end").strip()
         code = hint_mode_third_text_box.get("1.0", "end").strip()
 
+
         if building == "":
             messagebox.showwarning(
                 "Missing Information",
                 "Please describe what you are building."
             )
             return
+
 
         if problem.strip() == "" or problem == "Example:\nI don't know why my loop never stops.":
             messagebox.showwarning(
@@ -1557,12 +1644,14 @@ def main():
             )
             return
 
+
         if code.strip() == "" or code == "Only include the code related to your problem.":
             messagebox.showwarning(
                 "Missing Information",
                 "Please paste the relevant code."
             )
             return
+
 
         client = OpenAIClient()
 
@@ -1579,15 +1668,18 @@ def main():
             hint
         )
 
+
     def show_hint_session(building, problem, code, hint):
         print("show_hint_session called")
         clear_screen(welcome_frame)
+
 
         back_button = create_back_button(welcome_frame, open_hint_mode)
 
 
         title = tk.Label(welcome_frame, text="Hint Session", bg=DRACULA_PANEL_BG, fg=TEXT, font=HEADING_FONT)
         title.grid(row=0, column=0, pady=10)
+
 
 
         building_label = tk.Label(
@@ -1597,6 +1689,7 @@ def main():
             fg=TEXT_SECONDARY
         )
         building_label.grid(row=1, column=0, pady=7)
+
 
 
         hint_box = themed_textbox(welcome_frame, width=60, height=15)
@@ -1622,6 +1715,7 @@ def main():
             height=4
         )
         follow_up_box.grid(row=4, column=0, pady=5)
+
 
 
         def ask_another_hint():
@@ -1653,6 +1747,7 @@ def main():
             hint_box.config(state="disabled")
 
 
+
         follow_up_button = styled_button(
             welcome_frame,
             "Ask Again",
@@ -1660,6 +1755,7 @@ def main():
         )
 
         follow_up_button.grid(row=5, column=0, pady=10)
+
 
 
     def debug_mode():
@@ -1684,6 +1780,7 @@ def main():
         debug_mode_code_paste_text_box.bind("<FocusIn>", clear_placeholder)
 
 
+
         debug_mode_error_explanation_label = tk.Label(
             welcome_frame,
             text="What error do you get?" "\n" "(Please paste the terminal explanation here)",
@@ -1693,8 +1790,10 @@ def main():
         debug_mode_error_explanation_label.grid(row= 3,column=0, pady = 10)
 
 
+
         debug_mode_error_explanation_text_box = themed_textbox(welcome_frame, width=60, height=15)
         debug_mode_error_explanation_text_box.grid(row=4 , column = 0, pady = 10)
+
 
 
         debug_mode_error_explanation_text_box.insert(
@@ -1702,8 +1801,10 @@ def main():
             "Example:\nTypeError: unsupported operand type(s)..."
         )
 
+
         debug_mode_error_explanation_text_box.config(fg=AI_BOX_PLACEHOLDER_FG)
         debug_mode_error_explanation_text_box.bind("<FocusIn>", clear_placeholder)
+
 
 
         def start_debug():
@@ -1713,6 +1814,7 @@ def main():
             error = debug_mode_error_explanation_text_box.get("1.0", "end").strip()
 
 
+
             if code == "" or code == "Paste only the code related to your issue.":
                 messagebox.showwarning(
                     "Missing Information",
@@ -1720,6 +1822,7 @@ def main():
 
                 )
                 return
+
             if error == "" or error == "Example:\nTypeError: unsupported operand type(s)...":
                 messagebox.showwarning(
                     "Missing Information",
@@ -1727,9 +1830,11 @@ def main():
                 )
                 return
 
+
             client = OpenAIClient()
             debug_help = client.get_debug_help(code, error)
             show_debug_session(code, error, debug_help)
+
 
 
         debug_error_button = styled_button(welcome_frame, "Debug", start_debug)
@@ -1742,25 +1847,31 @@ def main():
 
         back_button = create_back_button(welcome_frame, debug_mode)
 
+
         show_debug_session_label = tk.Label(welcome_frame, text="Debug Session", bg=DRACULA_PANEL_BG, fg=TEXT, font=HEADING_FONT)
         show_debug_session_label.grid(row = 0, column = 0, pady = 10)
 
+
         your_error_label = tk.Label(welcome_frame, text="Your Error", bg=DRACULA_PANEL_BG, fg=TEXT_SECONDARY)
         your_error_label.grid(row = 1, column = 0, pady = 10)
+
 
         error_box = themed_textbox(welcome_frame, width=60, height=6)
         error_box.grid(row=2, column=0, pady=7)
         error_box.insert("1.0", error)
         error_box.config(state="disabled")
 
+
         ai_analysis_label = tk.Label(welcome_frame, text="AI Analysis", bg=DRACULA_PANEL_BG, fg=TEXT_SECONDARY)
         ai_analysis_label.grid(row = 3, column = 0, pady = 10)
+
 
 
         ai_analysis_text_box = themed_textbox(welcome_frame, width=60, height=6)
         ai_analysis_text_box.grid(row=4 , column = 0, pady = 10)
         ai_analysis_text_box.insert("1.0", debug_help)
         ai_analysis_text_box.config(state="disabled")
+
 
 
         help_label = tk.Label(welcome_frame, text="Still need help?", bg=DRACULA_PANEL_BG, fg=TEXT_SECONDARY)
@@ -1775,6 +1886,7 @@ def main():
             follow_up_question = another_question_text_box.get("1.0", "end").strip()
 
 
+
             if not follow_up_question:
                 messagebox.showwarning(
                     "Missing Information",
@@ -1783,6 +1895,7 @@ def main():
                 return
 
             client = OpenAIClient()
+
 
             new_debug_help = client.get_follow_up_debug(
                 code,
